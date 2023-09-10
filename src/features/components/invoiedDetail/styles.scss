@@ -1,0 +1,89 @@
+.detail{
+    //border: 1px solid red;
+    width: 100%;
+    height: auto;
+    margin: auto;
+    background-color: white;
+    border-radius: 5px;
+    overflow: hidden;
+    &__header{
+        border-bottom: 1px solid black;
+        background-color: rgb(245, 245, 240);
+        padding: 10px 0px;
+        &__content{
+            font-size: 20px;
+            font-weight: 600;
+            color: rgb(80, 76, 76);
+        }
+    }
+    &__body{
+        background-color: rgb(245, 245, 240);
+        padding: 15px 15px;
+        text-align: left;
+        &__input{
+            margin: 10px 0px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            span{
+                align-items: center;
+            }
+            input{
+                width: 70%;
+            }
+            &__textSmall{
+                font-size: 13px;
+            }
+            &__search{
+                width: 70%;
+                position: relative;
+                input{
+                    width: 100%;
+                }
+                i{
+                    position:absolute;
+                    width: 12px;
+                    height: 12px;
+                    //left: 5px;
+                    right: 5px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                }
+            }
+            select{
+                width: 70%;
+            }
+        }
+    }
+    &__footer{
+        //border-top: 1px solid black;
+        display: flex;
+        justify-content: right;
+        padding: 5px;
+       &__right{
+        display: flex;
+            &__cancel{
+                margin-left: 5px;
+                background-color: white;
+                border: none;
+                min-width: 40px;
+                min-height: 20px;
+                border-radius: 5px;
+            }
+            &__save{
+                display: flex;
+                align-items: center;
+                color: white;
+                margin-left: 5px;
+                background-color: rgb(86, 167, 247);
+                border: none;
+                min-width: 60px;
+                min-height: 30px;
+                border-radius: 5px;
+                i{
+                    margin-right: 5px;
+                }
+            }
+       }
+    }
+}

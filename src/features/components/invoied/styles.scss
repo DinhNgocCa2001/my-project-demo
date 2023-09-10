@@ -1,0 +1,90 @@
+
+.card{
+    position: initial;
+    width: 30%;
+    border: 1px solid red;
+    border-radius: 5px;
+    &__header{
+        background: #e5dddd69;
+        //margin: 10px;
+        display: flex;
+        justify-content: space-between;
+        &__left{
+            margin-left: 10px;
+            display: flex;
+            align-items:center;
+            &__icon{
+                margin-right: 10px;
+                background: orange;
+                color: white;
+                height: 24px;
+                width: 24px;
+                border-radius: 2px;
+            }
+            &__title{
+                font-size: 20px;
+                font-weight: 600;
+                margin: 20px 0px;
+            }
+        }
+        &__right{
+            margin-right: 10px;
+            display: flex;
+            align-items:center;
+        }
+    }
+
+    &__body{
+        margin: 10px;
+        display: flex;
+        justify-content: space-between;
+        &__left{
+            display: flex;
+            &__icon{
+                margin-right: 10px;
+                background: rgb(164, 223, 230);
+                color: white;
+                height: 24px;
+                width: 24px;
+                border-radius: 2px;
+            }
+            &__info{
+                text-align: left;
+                &__name{
+                    color: rgb(71, 209, 234);
+                    font-size: 15px;
+                }
+                &__detail{
+                    font-size: 14px;
+                }
+            }
+        }
+        &__right{
+            &__splitButton{
+                text-align: right;
+                ul{
+                    border: 1px solid red;
+                    margin: 0;
+                    padding: 0;
+                    li{
+                        text-align: left;
+                        list-style: none;
+                        text-decoration: none;
+                        min-width: 100px;
+
+                    }
+                }
+            }
+        }
+    }
+    &__footer{
+        border-top: 1px solid black;
+        margin-bottom: 10px;
+    }
+}
+.display-hidden{
+    display: none;
+}
+.list{
+    border: 1px solid red;
+}

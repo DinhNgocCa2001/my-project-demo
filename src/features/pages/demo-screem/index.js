@@ -23,6 +23,7 @@ export default function Demo(props) {
     }
     const [data, setData] = useState(null);
     const [visible, setVisible] = useState(false);
+    const [visibleDelete, setVisibleDelete] = useState(false);
 
     const [detail, setDetail] = useState(dataEmpty);
     const [loadding, setLoadding] = useState(false)
@@ -36,21 +37,13 @@ export default function Demo(props) {
 
     useEffect(
         () => {
-            getPostsData();
+            getSearchData();
         },
         [loadding, lazyParams]
     )
 
 
-    const getPostsData = () => {
-        // let res = await axios.get('http://localhost:8080/bookservice/books')
-        // console.log(res, "hhhhhhhhhhhhhhhhhhhhh")
-        // axios
-        // .get("http://localhost:8080/bookservice/books")
-        // .then(data => console.log(data))
-        // .catch(error => console.log(error));
-        // };
-
+    const getSearchData = () => {
         let result = axios.get('http://localhost:8080/product/search', {
             headers: {
                 "Content-type": "application/json",
@@ -124,12 +117,18 @@ export default function Demo(props) {
         setDetail(data);
         setVisible(true);
     }
+    const deleteProdcut = (data) => {
+        let _data = { ...data };
+        _data.status = 0;
+        setDetail(_data);
+        setVisibleDelete(true);
+    }
 
     const rendenCardProduct = (rowdata) => {
         return (
             // <a>
             <div className='productCard col-2'
-            //onClick={() => getPostsData()}
+            //onClick={() => getSearchData()}
             >
                 <div className='productCard__header'>
 
@@ -158,6 +157,7 @@ export default function Demo(props) {
                 </div>
                 <div className='productCard__footer mb-1'>
                     <button type="button" class="btn btn-outline-secondary" onClick={(e) => update(rowdata)}>Sửa</button>
+                    <button type="button" class="btn btn-outline-danger ml-1" onClick={(e) => deleteProdcut(rowdata)}>Xóa</button>
                 </div>
             </div>
             // </a>
@@ -226,6 +226,7 @@ export default function Demo(props) {
             createProduct(_detail);
         }
         setVisible(false);
+        setVisibleDelete(false);
     }
 
     const cancel = () => {
@@ -464,6 +465,15 @@ export default function Demo(props) {
                                 className="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"
                             />                        </div>
                     </div>
+                </div>
+
+
+            </Dialog>
+
+            <Dialog header="Sửa" visible={visibleDelete} style={{ width: '50vw' }} onHide={() => setVisibleDelete(false)} footer={footerContent}>
+
+                <div class="card w-full border-none">
+                    Bạn có muốn xóa sản phẩm {detail?.name} không ?
                 </div>
 
 

@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { Button } from 'primereact/button'; 
 import Demo from './features/pages/demo-screem';
+import OverView from './features/pages/OverView';
 import InvoiedProduct from './features/components/invoied';
 
 
@@ -34,9 +35,13 @@ function App() {
   return (
     <div className="App">
         {/* <InvoiedProduct title = "Nhân sự liên quan" listPerson={listPerson} ></InvoiedProduct>                   */}
-        <Demo>
+        {/* <Demo>
           
-        </Demo>
+        </Demo> */}
+
+        <OverView>
+          
+        </OverView>
     </div>
   );
 }

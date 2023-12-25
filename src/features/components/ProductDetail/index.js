@@ -22,7 +22,6 @@ export default function hellloDetail(props) {
     const [detail, setDetail]  = useState(null);
 
     const hello = () => {
-        console.log("jjjjjjjjjjjjjjjjjjjjjjjjjj")
     }
 
 

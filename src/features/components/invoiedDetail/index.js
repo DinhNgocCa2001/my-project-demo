@@ -10,7 +10,6 @@ export default function InvoiedDetail(props) {
     const { content, cancel, data } = props;
     const [selected, setSelected] = useState();
     const changeVaiTro = (e) => {
-        console.log(e, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
         setSelected(e.target.value);
     }
     return (

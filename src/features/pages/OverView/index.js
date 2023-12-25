@@ -10,6 +10,7 @@ import { Column } from 'primereact/column';
 import _ from "lodash"
 import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
+import {token} from "../../common/Constant"
 
 import "./styles.scss";
 
@@ -19,7 +20,7 @@ export default function OverView(props) {
         "name": null,
         "price": 0,
         "discount": 0,
-        "link": null,
+        "image": null,
         "description": "",
         "status": true
     }
@@ -46,16 +47,19 @@ export default function OverView(props) {
 
 
     const getSearchData = () => {
+        // phụ
         let result = axios.get('http://localhost:8080/product/search', {
             headers: {
                 "Content-type": "application/json",
-                //   "Authorization": `Bearer ${token}`,
+                  "Authorization": `Bearer ${token}`,
             },
             params: lazyParams
         }
         ).then((data) => {
-            setData(data.data);
-            setTotal(data.data.totalElements);
+            setData(data.data.result);
+            setTotal(data.data.result.totalElements);
+            // setData_atom_dataProduct(data.data.result.content)
+
         })
     }
 
@@ -63,7 +67,6 @@ export default function OverView(props) {
         let _param = { ...lazyParams };
         _param.page = page[0] - 1;
         setLazyParams(_param);
-        console.log(page[0] - 1, "eeeeeeeeeeeeeeeeeeee")
     }
 
     const renderPageItem = (data) => {
@@ -122,7 +125,7 @@ export default function OverView(props) {
                 "name": data.name,
                 "price": data.price,
                 "discount": data.discount,
-                "link": data.link,
+                "image": data.image,
                 "description": data.description,
                 "status": true
             }
@@ -140,7 +143,7 @@ export default function OverView(props) {
                 "name": data.name,
                 "price": data.price,
                 "discount": data.discount,
-                "link": data.link,
+                "image": data.image,
                 "description": data.description,
                 "status": data.status
             }).then((data) => {
@@ -149,7 +152,6 @@ export default function OverView(props) {
             })
     }
     const update = (data) => {
-        console.log(data, "666666666666666666666666")
         setDetail(data);
         setVisible(true);
     }
@@ -171,7 +173,7 @@ export default function OverView(props) {
                 </div>
                 <div className='productCard__body'>
                     <div className='productCard__body__img'>
-                        <img src={rowdata.link} width='100%' height='300' alt='hello img' />
+                        <img src={rowdata.image} width='100%' height='300' alt='hello img' />
                     </div>
 
                     <div className='productCard__body__content'>
@@ -283,7 +285,7 @@ export default function OverView(props) {
         applyServiceChange('name', e.target.value)
     }
     const handleChangeLink = (e) => {
-        applyServiceChange('link', e.target.value)
+        applyServiceChange('image', e.target.value)
     }
     const handleChangePrice = (e) => {
         applyServiceChange('price', e.value)
@@ -456,7 +458,7 @@ export default function OverView(props) {
                             <label for="lastname6">Link Url</label>
                             <InputText
                                 id="Name"
-                                value={detail?.link}
+                                value={detail?.image}
                                 //disabled={readOnly}
                                 onChange={handleChangeLink}
                                 className="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"

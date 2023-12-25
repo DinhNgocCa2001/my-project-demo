@@ -47,13 +47,11 @@ export default function Demo(props) {
 
     const edit = (data) => {
         setAbc(true)
-        console.log("ca dz")
         setEditData(data)
     }
 
     const deleteItem = (data) => {
         
-        console.log("ca dz đang tập xóa")
         
     }
 

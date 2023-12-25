@@ -5,27 +5,68 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
+import { Dropdown } from 'primereact/dropdown';
 import _ from "lodash"
 import React, { useRef, useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-
+import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
+import { atom_cart, atom_dataProduct } from "../../../recoil/My/atomHandle";
+import {token} from "../../common/Constant"
 import "./styles.scss";
 
 export default function Demo(props) {
+    const setData_AtomCart = useSetRecoilState(atom_cart)
+    const data_AtomCart = useRecoilValue(atom_cart)
+
+    const data_atom_dataProduct = useRecoilValue(atom_dataProduct)
+
     const dataEmpty =
     {
         "name": null,
         "price": 0,
         "discount": 0,
-        "link": null,
+        "image": null,
         "description": "",
-        "status": true
+        "status": true,
+        "categoryId": null
+    }
+    const userEmpty =
+    {
+        "username": null,
+        "password": null
     }
     const [data, setData] = useState(null);
     const [visible, setVisible] = useState(false);
     const [visibleDelete, setVisibleDelete] = useState(false);
+    const [userVisible, setUserVisible] = useState(false);
+    const [login, setLogin] = useState(userEmpty);
+
+    const typeProduct = [
+        {
+            "id": 1,
+            "name": "Clothing"
+        },
+        {
+            "id": 2,
+            "name": "Shoes"
+        },
+        {
+            "id": 3,
+            "name": "Tops"
+        },
+        {
+            "id": 4,
+            "name": "Bottoms"
+        },
+        {
+            "id": 5,
+            "name": "Accessories"
+        },
+    ]
 
     const [detail, setDetail] = useState(dataEmpty);
+    const [user, setUser] = useState(userEmpty);
     const [loadding, setLoadding] = useState(false)
     const [lazyParams, setLazyParams] = useState({
         size: 18,
@@ -42,18 +83,32 @@ export default function Demo(props) {
         [loadding, lazyParams]
     )
 
+    const navigate = useNavigate();
+    const routeChange = (path) => {
+        navigate(path);
+    }
+
+    const handleLogin = () => {
+        setUserVisible(true);
+    }
+
+    useEffect(() => {
+        console.log(data_AtomCart, "uuuuuuuuuuuuuuuuuuuuuuuuu")
+    }, [data_AtomCart])
+
 
     const getSearchData = () => {
+        //phụ
         let result = axios.get('http://localhost:8080/product/search', {
             headers: {
                 "Content-type": "application/json",
-                //   "Authorization": `Bearer ${token}`,
+                  "Authorization": `Bearer ${token}`,
             },
             params: lazyParams
         }
         ).then((data) => {
-            setData(data.data);
-            setTotal(data.data.totalElements);
+            setData(data.data?.result?.content);
+            setTotal(data.data.result?.totalElements);
         })
     }
 
@@ -61,7 +116,6 @@ export default function Demo(props) {
         let _param = { ...lazyParams };
         _param.page = page[0] - 1;
         setLazyParams(_param);
-        console.log(page[0] - 1, "eeeeeeeeeeeeeeeeeeee")
     }
 
     const renderPageItem = (data) => {
@@ -86,9 +140,10 @@ export default function Demo(props) {
                 "name": data.name,
                 "price": data.price,
                 "discount": data.discount,
-                "link": data.link,
+                "image": data.image,
                 "description": data.description,
-                "status": true
+                "status": true,
+                "categoryId": data.categoryId
             }
         ).then((data) => {
             setLoadding(!loadding);
@@ -104,7 +159,7 @@ export default function Demo(props) {
                 "name": data.name,
                 "price": data.price,
                 "discount": data.discount,
-                "link": data.link,
+                "image": data.image,
                 "description": data.description,
                 "status": data.status
             }).then((data) => {
@@ -113,7 +168,6 @@ export default function Demo(props) {
             })
     }
     const update = (data) => {
-        console.log(data, "666666666666666666666666")
         setDetail(data);
         setVisible(true);
     }
@@ -124,18 +178,25 @@ export default function Demo(props) {
         setVisibleDelete(true);
     }
 
+
+    const detailProduct = (data) => {
+        let _data = { ...data };
+        let linkUrl = "/product/detail/" + _data.id;
+        routeChange(linkUrl);
+    }
+
     const rendenCardProduct = (rowdata) => {
         return (
             // <a>
             <div className='productCard col-2'
-            //onClick={() => getSearchData()}
+                onClick={(e) => detailProduct(rowdata)}
             >
                 <div className='productCard__header'>
 
                 </div>
                 <div className='productCard__body'>
                     <div className='productCard__body__img'>
-                        <img src={rowdata.link} width='100%' height='300' alt='hello img' />
+                        <img src={rowdata.image} width='100%' height='300' alt='hello img' />
                     </div>
 
                     <div className='productCard__body__content'>
@@ -156,6 +217,7 @@ export default function Demo(props) {
                     </div>
                 </div>
                 <div className='productCard__footer mb-1'>
+                    {/* <button type="button" class="btn btn-outline-secondary" onClick={(e) => detailProduct(rowdata)}>Xem chi tiết</button> */}
                     <button type="button" class="btn btn-outline-secondary" onClick={(e) => update(rowdata)}>Sửa</button>
                     <button type="button" class="btn btn-outline-danger ml-1" onClick={(e) => deleteProdcut(rowdata)}>Xóa</button>
                 </div>
@@ -243,11 +305,27 @@ export default function Demo(props) {
         //performValidate([prop], _detail)
     }
 
+    const applyServiceChangeUser = (prop, val) => {
+        let _detail = _.cloneDeep(user)
+
+        _detail[prop] = val
+
+        setUser(_detail)
+        //performValidate([prop], _detail)
+    }
+
+    const handleChangeUsername = (e) => {
+        applyServiceChangeUser('username', e.target.value)
+    }
+    const handleChangePassword = (e) => {
+        applyServiceChangeUser('password', e.target.value)
+    }
+
     const handleChangeName = (e) => {
         applyServiceChange('name', e.target.value)
     }
     const handleChangeLink = (e) => {
-        applyServiceChange('link', e.target.value)
+        applyServiceChange('image', e.target.value)
     }
     const handleChangePrice = (e) => {
         applyServiceChange('price', e.value)
@@ -255,6 +333,10 @@ export default function Demo(props) {
 
     const handleChangeDiscount = (e) => {
         applyServiceChange('discount', e.value)
+    }
+
+    const handleChangeCategoryId = (e) => {
+        applyServiceChange('categoryId', e.value.id)
     }
 
     const handleChangeDescription = (e) => {
@@ -274,9 +356,56 @@ export default function Demo(props) {
             <button class="btn btn-outline-success" type="submit" onClick={(e) => submit()}>Lưu</button>
         </div>
     );
+
+    const cancelDetele = () => {
+        setVisibleDelete(false);
+        setDetail(dataEmpty);
+    }
+
+    const submitDetele = () => {
+        let _detail = { ...detail };
+        if (_detail.id) {
+            updateInDatabase(_detail);
+        } else {
+            createProduct(_detail);
+        }
+        setVisible(false);
+        setVisibleDelete(false);
+    }
+
+    const footerContentDetele = (
+        <div>
+            <button class="btn btn-outline-success" type="submit" onClick={(e) => cancelDetele()}>Hủy</button>
+            <button class="btn btn-outline-success" type="submit" onClick={(e) => submitDetele()}>Xóa</button>
+        </div>
+    );
+
+    // const submitLogin = () => {
+    //     let result = axios.post("http://localhost:8080/user/login",
+    //         {
+    //             "username": user.username,
+    //             "password": user.password
+    //         }
+    //     ).then((data) => {
+    //         if (data.data) {
+    //             setUserVisible(false);
+    //             setLogin(data.data)
+    //         } else {
+    //             console.log("failed")
+    //         }
+    //     }).catch((ex) => {
+    //         console.error(ex);
+    //     })
+    // }
+
+    // const footerContentUser = (
+    //     <div>
+    //         <button class="btn btn-outline-success" type="submit" onClick={(e) => submitLogin()}>Login</button>
+    //     </div>
+    // );
     return (
         <div>
-            <div className='t-header'>
+            {/* <div className='t-header'>
                 <div className='t-header-banner'>
                     <div className='t-header-banner-content'>
                         <div className='header-content-left'>
@@ -317,14 +446,26 @@ export default function Demo(props) {
                             <button type="button" class="position-relative">
                                 <i className="bx bx-shopping-bag text-3xl"></i>
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    99+
-                                    {/* <span class="visually-hidden">unread messages</span> */}
+                                    {data_AtomCart?.length}+
                                 </span>
+                            </button>
+                            <div className='mr-5'></div>
+                            <button type="button" class="position-relative d-flex" onClick={handleLogin}>
+                                {
+                                    (!login?.username || login?.username?.length == 0) &&
+                                    <i className="bx bx-user-circle text-3xl"></i>
+                                }
+                                <div class="btn btn-outline-secondary">
+                                    {login?.username ? login.username : "Login"}
+                                </div>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        99+
+                                    </span>
                             </button>
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>*/}
             <div className='header'>
                 <div className='header-navbar'>
                     <nav class="navbar navbar-expand-lg navbar-light">
@@ -353,22 +494,7 @@ export default function Demo(props) {
                                         Beauty
                                     </a>
                                 </li>
-                                {/* <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Dropdown
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                        <li><a class="dropdown-item" href="#">Action</a></li>
-                                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                                        <li><hr class="dropdown-divider" /></li>
-                                        <li><a class="dropdown-item" href="#">Something else here</a></li>
-                                    </ul>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-                                </li> */}
                             </ul>
-                            {/* <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" /> */}
                         </div>
                     </nav>
                     <div className='header-navbar-right'>
@@ -378,12 +504,12 @@ export default function Demo(props) {
                                 <li class="page-item disabled">
                                     <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
                                 </li>
-                                {renderPageItem(data)}
-                                {/* <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                    <li class="page-item active" aria-current="page">
-                                        <a class="page-link" href="#">2</a>
-                                    </li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li> */}
+                                {renderPageItem(data_atom_dataProduct)}
+                                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item active" aria-current="page">
+                                    <a class="page-link" href="#">2</a>
+                                </li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
                                 <li class="page-item">
                                     <a class="page-link" href="#">Next</a>
                                 </li>
@@ -399,10 +525,11 @@ export default function Demo(props) {
                 >
                     c
                 </div> */}
+                {console.log(data_atom_dataProduct, "hhhhhhhhhhhhhhhhhhhhhh")}
                 <div className='layout-center'>
                     <div class="container-fluid">
                         <div class="row">
-                            {data?.content.map((e) => (
+                            {data_atom_dataProduct?.content?.map((e) => (
                                 rendenCardProduct(e)
                             ))}
                         </div>
@@ -432,10 +559,10 @@ export default function Demo(props) {
                             <label for="lastname6">Link Url</label>
                             <InputText
                                 id="Name"
-                                value={detail?.link}
+                                value={detail?.image}
                                 //disabled={readOnly}
                                 onChange={handleChangeLink}
-                                className="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"
+                                className="text-base text-color surface-overlay border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"
                             />                        </div>
                         <div class="field col-12 md:col-6">
                             <label for="firstname6">Price</label>
@@ -454,7 +581,19 @@ export default function Demo(props) {
                                 //disabled={readOnly}
                                 onChange={handleChangeDiscount}
                                 className="text-base text-color surface-overlay surface-border border-round appearance-none outline-none focus:border-primary w-full"
-                            />                        </div>
+                            />
+                        </div>
+                        <div class="field col-12 md:col-6">
+                            <label for="lastname6">Loại sản phẩm</label>
+                            <Dropdown
+                                value={detail?.categoryId}
+                                onChange={handleChangeCategoryId}
+                                options={typeProduct}
+                                optionLabel="name"
+                                placeholder="Chọn loại sản phẩm"
+                                className="text-base text-color surface-overlay surface-border border-round appearance-none outline-none focus:border-primary w-full"
+                            />
+                        </div>
                         <div class="field col-12 md:col-12">
                             <label for="lastname6">Description</label>
                             <InputText
@@ -463,20 +602,18 @@ export default function Demo(props) {
                                 //disabled={readOnly}
                                 onChange={handleChangeDescription}
                                 className="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"
-                            />                        </div>
+                            />
+                        </div>
                     </div>
                 </div>
 
 
             </Dialog>
 
-            <Dialog header="Sửa" visible={visibleDelete} style={{ width: '50vw' }} onHide={() => setVisibleDelete(false)} footer={footerContent}>
-
+            <Dialog header="Xóa" visible={visibleDelete} style={{ width: '50vw' }} onHide={() => setVisibleDelete(false)} footer={footerContentDetele}>
                 <div class="card w-full border-none">
                     Bạn có muốn xóa sản phẩm {detail?.name} không ?
                 </div>
-
-
             </Dialog>
         </div>
     )

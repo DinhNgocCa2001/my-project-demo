@@ -15,13 +15,17 @@ import { generateRandomId } from '../../common/Constant';
 import { Dropdown } from 'primereact/dropdown';
 import { atom_cart } from "../../../recoil/My/atomHandle";
 import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
-import {token} from "../../common/Constant"
+import { token } from "../../common/Constant"
+import { Toast } from 'primereact/toast';
+
 
 
 import "./styles.scss";
 import { message } from 'antd';
 
 export default function DetailProduct(props) {
+    const toast = useRef(null);
+
     const setData_AtomCart = useSetRecoilState(atom_cart)
     const data_AtomCart = useRecoilValue(atom_cart)
 
@@ -75,37 +79,124 @@ export default function DetailProduct(props) {
         console.log(page[0] - 1, "eeeeeeeeeeeeeeeeeeee")
     }
 
-    const addOrder = () => {
-        let result = axios.post(`http://localhost:8080/cart/add-order`,
-        null ,
-        {
-            headers: {
-                "Content-type": "application/json",
-                  "Authorization": `Bearer ${token}`,
+    const addOrder = async () => {
+        let result = await axios.post(`http://localhost:8080/cart/add-order`,
+            null,
+            {
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                }
             }
+        );
+        // .then((data) => {
+
+        //     if(data.data.code == "00"){
+        //         message.warning("Vui lòng đăng nhập để tạo đơn hàng!")
+        //     }
+
+        //     if(data.data.code == "01"){
+        //         message.success("Tạo đơn hàng thành công!")
+        //     }
+
+        //     if(data.data.code == "02"){
+        //         message.error("Có lỗi xảy ra!")
+        //     }
+
+        //     if(data.data.code == "03"){
+        //         message.error("Đơn hàng đã có!")
+        //     }
+
+        //     addItemToOrder(data.data.result);
+        //     console.log(data.data.result, "vvvvvvvvvvvvvvvvvvvvvvvvvvv");
+        // })
+
+        return result;
+
+
+        // let _data = [...data_AtomCart]
+        // _data.push({
+        //     name: detail?.name,
+        //     quantity: detailBuy?.quantity,
+        //     discount: detail?.discount,
+        //     price: detail?.price,
+        //     sizeId: detailBuy?.sizeId,
+        //     colorId: detailBuy?.colorId
+        // })
+        // setData_AtomCart(_data);
+        // console.log(_data, "aaaaaaaaaaaaaaaaaaaaaa")
+        // setVisibleAddCart(true);
+    }
+
+    const getProductVariantBySizeIdAndColorId = async () => {
+        let result = await axios.post(`http://localhost:8080/cart/add-order`,
+            null,
+            {
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                }
+            }
+        );
+        return result;
+    }
+    // const show = () => {
+    //     toast.current.show({ severity: 'info', summary: 'Info', detail: 'Message Content' });
+    // };
+
+    const addOrderItem = async () => {
+        let _order = await addOrder();
+        let _detailBuy = { ...detailBuy };
+        _detailBuy.productId = id;
+        console.log(_order, "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
+        if(!_order.data.result?.id){
+            toast.current.show({ severity: 'warn', detail: 'Bạn phải đăng nhập để thêm sản phẩm vào giỏ hàng!' });
+            return 0;
         }
-        ).then((data) => {
+ 
+        _detailBuy.orderId = _order.data.result.id;
+        _detailBuy.userId = _order.data.result.userId;
 
-            if(data.data.code == "00"){
-                message.warning("Vui lòng đăng nhập để tạo đơn hàng!")
+        let result = await axios.post(`http://localhost:8080/order-item/add-order-item`,
+            _detailBuy,
+            {
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                }
             }
+        );
+        if (result.data.result == "FALSE") {
+            // message.error("Sản phẩm trong kho đã hết!")
+            toast.current.show({ severity: 'error', detail: 'Sản phẩm trong kho đã hết!' });
 
-            if(data.data.code == "01"){
-                message.success("Tạo đơn hàng thành công!")
+        }
+        if (result.data.result == "HAS") {
+            // message.warning("Sản phẩm đã ở trong giỏ hàng!")
+            toast.current.show({ severity: 'warn', detail: 'Sản phẩm đã ở trong giỏ hàng!' });
+
+        }
+        if (result.data.result == "NEW") {
+            // message.success("Sản phẩm đã được thêm vào giỏ hàng!")
+            toast.current.show({ severity: 'success', detail: 'Sản phẩm đã được thêm vào giỏ hàng!' });
+
+        }
+        console.log(result, "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+        updateOrderItem();
+
+    }
+
+    const updateOrderItem = async () => {
+        let result = await axios.get(`http://localhost:8080/order-item/get-by-id`,
+            {
+                headers: {
+                    // Sử dụng tiêu đề "Authorization"
+                    "Authorization": `Bearer ${token}`,
+                    "Content-type": "application/json"
+                }
             }
-
-            if(data.data.code == "02"){
-                message.error("Có lỗi xảy ra!")
-            }
-
-            if(data.data.code == "03"){
-                message.error("Đơn hàng đã có!")
-            }
-
-            addItemToOrder(data.data.result);
-            // setDetail(data.data);
-            // console.log(data, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
-        })
+        );
+        console.log(result, "99999999999999999999999999")
 
         let _data = [...data_AtomCart]
         _data.push({
@@ -116,7 +207,7 @@ export default function DetailProduct(props) {
             sizeId: detailBuy?.sizeId,
             colorId: detailBuy?.colorId
         })
-        setData_AtomCart(_data);
+        setData_AtomCart(result.data.result);
         console.log(_data, "aaaaaaaaaaaaaaaaaaaaaa")
         setVisibleAddCart(true);
     }
@@ -185,6 +276,29 @@ export default function DetailProduct(props) {
         })
     }
 
+
+    // const getItemSizeAndColor = () => {
+    //     let result = axios.get(`http://localhost:8080/product/get-productVariant-by-product-id/${id}`).then((data) => {
+    //         let dataReal = data.data;
+    //         setSize(dataReal);
+    //         const sizes = data.map(item => {
+    //             return {
+    //                 sizeId: item.sizeId,
+    //                 sizeName: item.sizeName
+    //             };
+    //         });
+
+    //         const colors = data.map(item => {
+    //             return {
+    //                 colorId: item.colorId,
+    //                 colorName: item.colorName
+    //             };
+    //         });
+    //         setColor(colors);
+    //         setSize(sizes)
+    //     })
+    // }
+
     // const getAllSize = () => {
     //     let result = axios.get(`http://localhost:8080/product/get-all-size`).then((data) => {
     //         let dataReal = data.data;
@@ -199,6 +313,7 @@ export default function DetailProduct(props) {
             // getAllSize();
             getItemColor();
             getItemSize();
+            // getItemSizeAndColor();
         }, [])
 
     const changeSearch = (e) => {
@@ -343,10 +458,11 @@ export default function DetailProduct(props) {
                         <div className='m-3'></div>
                         <button type="button" class="btn btn-outline-secondary"
                             disabled={visibleAddCart}
-                            onClick={(e) => addOrder()}>Thêm vào giỏ hàng</button>
+                            onClick={(e) => addOrderItem()}>Thêm vào giỏ hàng</button>
                     </div>
                 </div>
             </div>
+            <Toast ref={toast} position="top-right" />
         </div>
     )
 }

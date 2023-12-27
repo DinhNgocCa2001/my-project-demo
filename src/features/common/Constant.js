@@ -9,3 +9,11 @@ export const getTokenLocalStorage = () => {
     return token
 }
 export const token = localStorage.getItem("token");
+
+export const formattedAmount = (amount) => {
+    let result = amount?.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      });
+    return result;
+}

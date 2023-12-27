@@ -13,9 +13,10 @@ import axios from 'axios';
 import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
 import { atom_cart, atom_dataProduct } from "../../../recoil/My/atomHandle";
 import Login from '../../pages/Login/index';
-import {token} from "../../common/Constant"
+import { token } from "../../common/Constant"
 
 import "./styles.scss";
+import { redirect } from 'react-router-dom';
 
 export default function HeaderMy(props) {
     const setData_AtomCart = useSetRecoilState(atom_cart)
@@ -98,7 +99,7 @@ export default function HeaderMy(props) {
         let result = axios.get('http://localhost:8080/product/search', {
             headers: {
                 "Content-type": "application/json",
-                  "Authorization": `Bearer ${token}`,
+                "Authorization": `Bearer ${token}`,
             },
             params: lazyParams
         }
@@ -305,19 +306,26 @@ export default function HeaderMy(props) {
             <button class="btn btn-outline-success" type="submit" onClick={(e) => submitLogin()}>Login</button>
         </div>
     );
+
+    const renderListItemInCart = () => {
+        window.location.href = "/cart";
+    }
+
     return (
         <div>
             <div className='t-header'>
                 <div className='t-header-banner'>
                     <div className='t-header-banner-content'>
                         <div className='header-content-left'>
-                            <img src="https://1.bp.blogspot.com/-1JPaVHUJnGU/YOQeX2ylZII/AAAAAAAAFa0/2jJttGEW6f0fqL8KEAc6HLWFf3m0JILzACLcBGAsYHQ/logo.png" alt='hello img' />
+                            <img src="https://pubcdn.ivymoda.com/ivy2/images/logo.png" alt='hello img' />
+
+                            {/* <img src="https://1.bp.blogspot.com/-1JPaVHUJnGU/YOQeX2ylZII/AAAAAAAAFa0/2jJttGEW6f0fqL8KEAc6HLWFf3m0JILzACLcBGAsYHQ/logo.png" alt='hello img' /> */}
                         </div>
                         <div className='t-header-banner-content-center'>
                             <div className='t-header-banner-content-center-search'>
-                                <input placeholder='Tìm kiếm sản phẩm' onChange={changeSearch}></input>
+                                <input placeholder='Tìm kiếm sản phẩm' className='px-2' onChange={changeSearch}></input>
                             </div>
-                            <div className='t-header-banner-content-center-help'>
+                            {/* <div className='t-header-banner-content-center-help'>
                                 <div className='t-header-banner-content-center-help-img'>
                                     <img src="https://cdn-icons-png.flaticon.com/512/7044/7044607.png" alt='hello img' />
                                 </div>
@@ -342,10 +350,10 @@ export default function HeaderMy(props) {
                                         1900 1000
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                         <div className='t-header-banner-content-right'>
-                            <button type="button" class="position-relative">
+                            <button type="button" class="position-relative" onClick={() => renderListItemInCart()}>
                                 <i className="bx bx-shopping-bag text-3xl"></i>
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                     {data_AtomCart?.length > 10 ? "10" : data_AtomCart?.length}{data_AtomCart?.length > 10 ? "+" : null}
@@ -381,6 +389,7 @@ export default function HeaderMy(props) {
                     <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
                 </li>
             </ul>
+            <hr className='mt-1 mb-4'></hr>
 
 
             <Dialog
@@ -388,7 +397,7 @@ export default function HeaderMy(props) {
                 visible={userVisible}
                 style={{ width: '35vw', height: "70vw" }}
                 onHide={() => setUserVisible(false)}
-                // footer={footerContentUser}
+            // footer={footerContentUser}
             >
 
                 {/* <div class="card w-full border-none">

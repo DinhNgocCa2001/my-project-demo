@@ -4,6 +4,8 @@ import { Button } from 'primereact/button';
 import Demo from './features/pages/demo-screem';
 import Login from './features/pages/Login';
 import Cart from './features/pages/Cart';
+import Checkout from './features/pages/Checkout';
+
 
 import OverView from './features/pages/OverView';
 import DetailProduct from './features/pages/DetailProduct'
@@ -30,6 +32,7 @@ function App() {
             <Route path="/product/detail/:id" element={<DetailProduct />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
           </Routes>
         </BrowserRouter>
       </div>

@@ -30,7 +30,7 @@ import { Toast } from 'primereact/toast';
 
 // import "./styles.scss";
 
-export default function Cart(props) {
+export default function Checkout(props) {
     const toast = useRef(null);
     const setData_AtomCart = useSetRecoilState(atom_cart)
     const data_AtomCart = useRecoilValue(atom_cart)
@@ -75,7 +75,7 @@ export default function Cart(props) {
         //performValidate([prop], _detail)
     }
     const handleChangeQuantity = async (e, product) => {
-        if(e.target.value){
+        if (e.target.value) {
             let _itemCart = [...itemCart]
             let item = _itemCart.filter(o => o.id === product.id)
             let _item = { ...item[0] };
@@ -90,10 +90,10 @@ export default function Cart(props) {
                     }
                 }
             );
-            if(result.data?.result == "NOT ENOUGH"){
+            if (result.data?.result == "NOT ENOUGH") {
                 toast.current.show({ severity: 'Error', detail: 'Quá số lượng trong kho!' });
             }
-            if(result.data?.result == "NOT EXIST"){
+            if (result.data?.result == "NOT EXIST") {
                 toast.current.show({ severity: 'Error', detail: 'Sản phẩm không có kích thước và màu sắc tương ứng!' });
             }
             console.log(result, "ddddddddddddddddddddddđ")
@@ -155,13 +155,14 @@ export default function Cart(props) {
                         </div>
                         <div className="flex flex-column sm:flex-row align-items-start xl:align-items-start flex-1 gap-4 justify-content-end">
                             <div className="flex sm:flex-column align-items-center sm:align-items-end gap-6 sm:gap-2 pr-5 mr-1">
-                                <InputText
+                                {/* <InputText
                                     type="text"
                                     className="p-inputtext-sm w-3"
                                     // value={product?.quantity}
-                                    defaultValue={product?.quantity}
+                                    defaultValue={product?.cartQuantity}
                                     onChange={(e) => handleChangeQuantity(e, product)}
-                                />
+                                /> */}
+                                {product?.quantity}
                             </div>
                             <div className="flex sm:flex-column align-items-center sm:align-items-end gap-3 sm:gap-2 text-right">
                                 <span className="text-2xl font-semibold w-5rem">${product.price}</span>
@@ -225,6 +226,25 @@ export default function Cart(props) {
         )
     };
 
+    const checkout = async () => {
+        let _checkout = {};
+        _checkout.total = Math.round(total * 100) / 100;
+
+        let result = await axios.post(`http://localhost:8080/order-item/check-out`,
+            _checkout,
+            {
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                }
+            }
+        );
+        if(result.data?.result == "Done"){
+            toast.current.show({ severity: 'Success', detail: 'Đơn hàng đang được xử lý!' });
+        } else {
+            toast.current.show({ severity: 'Error', detail: 'Tạo đơn hàng thất bại!' });
+        }
+    }
     // useEffect(() => {
     //     updateOrderItem();
     // }, [])
@@ -265,7 +285,7 @@ export default function Cart(props) {
                                 </div>
                             </div>
                             <div className='text-center mt-1'>
-                                <Button label="Thanh Toán" severity="secondary" outlined style={{ width: "200px" }} />
+                                <Button label="Thanh Toán" severity="secondary" outlined style={{ width: "200px" }} onClick={() => checkout()} />
                             </div>
                             <div className='text-xs	text-left mt-3'>
                                 Rewards will be added to your account once the order has been fully shipped. Rewards amount is subject to change.

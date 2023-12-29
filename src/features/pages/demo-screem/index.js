@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
 import { atom_cart, atom_dataProduct } from "../../../recoil/My/atomHandle";
-import {token} from "../../common/Constant"
+import { token } from "../../common/Constant"
 import "./styles.scss";
 
 export default function Demo(props) {
@@ -20,6 +20,8 @@ export default function Demo(props) {
     const data_AtomCart = useRecoilValue(atom_cart)
 
     const data_atom_dataProduct = useRecoilValue(atom_dataProduct)
+
+    const [dataSuggestion, setDataSuggestion] = useState();
 
     const dataEmpty =
     {
@@ -83,6 +85,13 @@ export default function Demo(props) {
         [loadding, lazyParams]
     )
 
+    useEffect(
+        () => {
+            getDataSuggestion();
+        },
+        []
+    )
+
     const navigate = useNavigate();
     const routeChange = (path) => {
         navigate(path);
@@ -96,13 +105,28 @@ export default function Demo(props) {
         console.log(data_AtomCart, "uuuuuuuuuuuuuuuuuuuuuuuuu")
     }, [data_AtomCart])
 
+    const getDataSuggestion = () => {
+        //phụ
+        let result = axios.get('http://localhost:8080/product-suggestion-data/get-product-suggestion-data', {
+            // headers: {
+            //     "Content-type": "application/json",
+            //       "Authorization": `Bearer ${token}`,
+            // },
+            // params: lazyParams
+        }
+        ).then((data) => {
+            setDataSuggestion(data.data);
+            // setTotal(data.data.result?.totalElements);
+        })
+    }
+
 
     const getSearchData = () => {
         //phụ
         let result = axios.get('http://localhost:8080/product/search', {
             headers: {
                 "Content-type": "application/json",
-                  "Authorization": `Bearer ${token}`,
+                "Authorization": `Bearer ${token}`,
             },
             params: lazyParams
         }
@@ -540,6 +564,24 @@ export default function Demo(props) {
                     a
                 </div> */}
             </div>
+
+            <div>
+                Gợi ý sản phẩm
+            </div>
+            {console.log(dataSuggestion, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")}
+
+            <div className="layout">
+                <div className='layout-center'>
+                    <div class="container-fluid">
+                        <div class="row">
+                            {dataSuggestion?.map((e) => (
+                                rendenCardProduct(e)
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <Dialog header="Sửa" visible={visible} style={{ width: '50vw' }} onHide={() => setVisible(false)} footer={footerContent}>
 
                 <div class="card w-full border-none">

@@ -11,44 +11,30 @@ import _ from "lodash"
 import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import { token } from "../../common/Constant"
-import { formattedAmount, listCategory, TextToHtmlVisable } from "../../common/Constant";
+import { formattedAmount, listCategory, formattedDate } from "../../common/Constant";
 import { Tag } from 'primereact/tag';
 import { Dropdown } from 'primereact/dropdown';
-import { Image } from 'primereact/image';
-import { Editor } from 'primereact/editor';
-
-
 import { SplitButton } from 'primereact/splitbutton';
 import { Toast } from 'primereact/toast';
-
-import { FileUpload } from 'primereact/fileupload';
-
-import ca  from "../../../assets/1317711.jpeg"
-
-
 import "./styles.scss";
 
-export default function OverView(props) {
+export default function UserAdministration(props) {
+
     const toast = useRef(null);
 
     const dataEmpty =
     {
         "name": null,
-        "price": null,
-        "discount": null,
+        "price": 0,
+        "discount": 0,
         "image": null,
         "description": "",
-        "status": true,
-        "categoryId": null
+        "status": true
     }
     const [data, setData] = useState(null);
     const [visible, setVisible] = useState(false);
     const [visibleDelete, setVisibleDelete] = useState(false);
-    const [dataOld, setDataOld] = useState(null);
-    const [text, setText] = useState("");
-    const [title, setTitle] = useState("Tạo mới");
-
-
+    const [dataOld ,setDataOld] =  useState(null);
 
     /**
  * on datatable change paging
@@ -80,21 +66,21 @@ export default function OverView(props) {
         },
         [loadding, lazyParams]
     )
-    const hanleChangeStatus = async (product) => {
-        let _product = { ...product };
-        _product.createdAt = null;
-        _product.updatedAt = null;
+    const hanleChangeStatus = async (product) => {        
+        let _product = {...product};
+        _product.createdAt =  null;
+        _product.updatedAt =  null;
 
-        let result = await axios.put('http://localhost:8080/product/update-status', _product, {
+        let result = await axios.put('http://localhost:8080/user/update-status',_product, {
             headers: {
                 "Content-type": "application/json",
                 "Authorization": `Bearer ${token}`,
             },
         });
-        if (result.data) {
-            toast.current.show({ severity: 'info', detail: 'Thay đổi trạng thái sản phẩm thành công!' });
-        } else {
-            toast.current.show({ severity: 'error', detail: 'Thay đổi trạng thái sản phẩm thất bại!' });
+        if(result.data){
+            toast.current.show({ severity: 'info', detail: 'Thay đổi trạng thái người dùng thành công!' });
+        }else{
+            toast.current.show({ severity: 'error', detail: 'Thay đổi trạng thái người dùng thất bại!' });
         }
         setLoadding(!loadding);
     }
@@ -103,7 +89,7 @@ export default function OverView(props) {
     const getSearchData = async () => {
         // phụ
         let idString = null;
-        let result = await axios.get('http://localhost:8080/product/ad/search', {
+        let result = await axios.get('http://localhost:8080/user/search', {
             headers: {
                 "Content-type": "application/json",
                 "Authorization": `Bearer ${token}`,
@@ -114,41 +100,6 @@ export default function OverView(props) {
         setDataOld(result.data.result);
         setTotal(result.data.result?.totalElements);
         // setData_atom_dataProduct(data.data.result.content)
-
-        //lấy tổng các sản phầm :đã bán , trong kho, trong giỏ hàng
-        var ids = result.data.result?.content?.map(function (element) {
-            return element.id;
-        });
-
-        let _data = [];
-        if (result.data?.result?.content) {
-            _data = [...result.data?.result?.content];
-        }
-
-        idString = ids?.join(',');
-        if (idString) {
-            let result = await axios.get('http://localhost:8080/product/ad/search/countProduct', {
-                headers: {
-                    "Content-type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
-                params: {
-                    ids: idString,
-                }
-            });
-
-            let mergedArray = [];
-
-            _data.forEach(item1 => {
-                const matchingItem = result.data?.result.find(item2 => item2.productId === item1.id);
-                if (matchingItem) {
-                    const mergedItem = Object.assign({}, item1, matchingItem);
-                    mergedArray.push(mergedItem);
-                }
-            });
-            console.log(mergedArray, "9999999999999999999")
-            setData(mergedArray)
-        }
     }
 
     const handleChangeParams = (page) => {
@@ -184,6 +135,16 @@ export default function OverView(props) {
         return <img src={product?.image} alt={product?.image} className="w-2rem h-3rem shadow-2 border-round" />;
     };
 
+    const sexBodyTemplate = (product) => {
+        let strSex = product?.sex == 0 ? "Male" : product?.sex == 1 ? "Female" : product?.sex == 2 ? "Orther" : "";
+        return strSex;
+    }
+
+    const dateOfBirthBodyTemplate = (product) => {
+        return formattedDate(product?.dateOfBirth);
+    }
+
+
     const idTemplate = (product) => {
         return `#${product?.id}`;
     };
@@ -192,49 +153,14 @@ export default function OverView(props) {
         return formattedAmount(product?.price);
     };
 
-    const discountBodyTemplate = (product) => {
-        return product?.discount + "%";
-    };
-
     const categoryTemplate = (product) => {
-        let result = listCategory.filter(o => o.id === product.categoryId)[0]?.name;
+        let result = listCategory.filter(o => o.id === product.categoryId)[0].name;
         return result;
     }
 
     const statusBodyTemplate = (product) => {
-        return <Tag value={product?.status ? "AVAILABLE" : "DISCONTINUED"} severity={getSeverity(product)}></Tag>;
+        return <Tag value={product?.status ? "Active" : "Inactive"} severity={getSeverity(product)}></Tag>;
     };
-
-    const hanleVisibleUpdate = async (product) => {
-        if(product.id){
-            setTitle("Sửa")
-        }else{
-            setTitle("Tạo mới")
-        }
-        setVisible(true)
-        setDetail(product)
-        setText(product?.description)
-    }
-
-    const hanleUpdateProduct = async (product) => {
-        
-        let _product = { ...product };
-        _product.createdAt = null;
-        _product.updatedAt = null;
-
-        let result = await axios.put('http://localhost:8080/product/update-status', _product, {
-            headers: {
-                "Content-type": "application/json",
-                "Authorization": `Bearer ${token}`,
-            },
-        });
-        if (result.data) {
-            toast.current.show({ severity: 'info', detail: 'Thay đổi trạng thái sản phẩm thành công!' });
-        } else {
-            toast.current.show({ severity: 'error', detail: 'Thay đổi trạng thái sản phẩm thất bại!' });
-        }
-        setLoadding(!loadding);
-    }
 
     const actionTemplate = (product) => {
         const items = [
@@ -242,7 +168,6 @@ export default function OverView(props) {
                 label: 'Update',
                 icon: 'pi pi-refresh',
                 command: () => {
-                    hanleVisibleUpdate(product)
                     // toast.current.show({ severity: 'success', summary: 'Updated', detail: 'Data Updated' });
                 }
             },
@@ -251,8 +176,8 @@ export default function OverView(props) {
                 icon: 'pi pi-times',
                 command: () =>
                     hanleChangeStatus(product)
-                // toast.current.show({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted' });
-
+                    // toast.current.show({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted' });
+                
             },
         ]
         return <SplitButton
@@ -310,7 +235,7 @@ export default function OverView(props) {
                 </DataTable> */}
 
                 <DataTable
-                    value={data}
+                    value={dataOld?.content}
                     // header={header}
                     // footer={footer}
                     tableStyle={{ minWidth: '100%' }}
@@ -318,19 +243,33 @@ export default function OverView(props) {
                 // paginator rows={5} rowsPerPageOptions={[5, 10, 25, 50]}
 
                 >
-                    <Column field="id" header="id" body={idTemplate}></Column>
-                    <Column field="name" header="Name"></Column>
-                    <Column header="Image" body={imageBodyTemplate}></Column>
+                    <Column field="id" header="id"></Column>
+                    <Column field="username" header="User Name"></Column>
+                    <Column field="email" header="Email"></Column>
+
+                    <Column field="fullname" header="Full Name"></Column>
+
+                    <Column field="Sex" header="Sex" body={sexBodyTemplate}></Column>
+                    <Column field="dateOfBirth" header="Date Of Birth" body={dateOfBirthBodyTemplate}></Column>
+
+
+                    <Column field="address" header="Address"></Column>
+
+                    <Column field="roleId" header="Role Id"></Column>
+
+                    {/* <Column field="createdAt" header="createdAt"></Column>
+                    <Column field="updatedAt" header="updatedAt"></Column> */}
+
+
+
+                    {/* <Column header="Image" body={imageBodyTemplate}></Column>
                     <Column field="price" header="Price" body={priceBodyTemplate}></Column>
-
-                    <Column field="discount" header="Discount" body={discountBodyTemplate}></Column>
-
 
                     <Column field="soldQuantity" header="Số lượng trong kho"></Column>
                     <Column field="cartQuantity" header="Số lượng trong giỏ hàng"></Column>
-                    <Column field="stock" header="Số lượng đã bán"></Column>
+                    <Column field="stock" header="Số lượng đã bán"></Column> */}
 
-                    <Column field="category" header="Category" body={categoryTemplate}></Column>
+                    {/* <Column field="category" header="Category" body={categoryTemplate}></Column> */}
                     {/* <Column field="rating" header="Reviews" body={ratingBodyTemplate}></Column> */}
                     <Column header="Status" body={statusBodyTemplate}></Column>
                     <Column header="Action" body={actionTemplate}></Column>
@@ -347,8 +286,7 @@ export default function OverView(props) {
                 "discount": data.discount,
                 "image": data.image,
                 "description": data.description,
-                "status": true,
-                "categoryId": data.categoryId
+                "status": true
             }
         ).then((data) => {
             setLoadding(!loadding);
@@ -366,8 +304,7 @@ export default function OverView(props) {
                 "discount": data.discount,
                 "image": data.image,
                 "description": data.description,
-                "status": data.status,
-                "categoryId": data.categoryId
+                "status": data.status
             }).then((data) => {
                 setLoadding(!loadding);
                 setDetail(dataEmpty);
@@ -400,7 +337,7 @@ export default function OverView(props) {
 
                     <div className='productCard__body__content'>
                         <div className='productCard__body__content__title'>
-                            {rowdata?.name}
+                            {rowdata.name}
                         </div>
                         <div className='productCard__body__content__priceFinal'>
                             {new Intl.NumberFormat().format(rowdata.price * (100 - rowdata.discount) / 100)}₫
@@ -479,9 +416,7 @@ export default function OverView(props) {
     // }
 
     const submit = () => {
-        let _text = _.cloneDeep(text)
         let _detail = { ...detail };
-        _detail.description = _text;
         if (_detail.id) {
             updateInDatabase(_detail);
         } else {
@@ -494,13 +429,13 @@ export default function OverView(props) {
     const cancel = () => {
         setVisible(false);
         setDetail(dataEmpty);
-        setText("");
-        setTitle("Tạo mới")
     }
 
     const applyServiceChange = (prop, val) => {
         let _detail = _.cloneDeep(detail)
+
         _detail[prop] = val
+
         setDetail(_detail)
         //performValidate([prop], _detail)
     }
@@ -519,13 +454,8 @@ export default function OverView(props) {
         applyServiceChange('discount', e.value)
     }
 
-    const handleChangeCategoryId = (e) => {
-        applyServiceChange('categoryId', e.target.value)
-    }
-
     const handleChangeDescription = (e) => {
-        console.log(e, "oooooooooooooooooooooooooooooooooooooooo")
-        // applyServiceChange('description', e.textValue)
+        applyServiceChange('description', e.target.value)
     }
 
     const changeSearch = (e) => {
@@ -541,22 +471,13 @@ export default function OverView(props) {
             <button class="btn btn-outline-success" type="submit" onClick={(e) => submit()}>Lưu</button>
         </div>
     );
-
-    const onUpload = (e) => {
-        let path = e.target?.value;
-        var lastSegment = path.substring(path.lastIndexOf('\\') + 1);
-        console.log(lastSegment, "ttttttttttttttttttttt")
-
-        toast.current.show({ severity: 'info', summary: 'Success', detail: 'File Uploaded' });
-    };
-
     return (
         <div className='abc'>
             <div className='def'>
                 <div className='header'>
                     <div className='header-navbar flex justify-content-end'>
                         <div className='header-navbar-right'>
-                            <button class="btn btn-outline-customer" type="submit" onClick={(e) => setVisible(true)}>Tạo mới</button>
+                            {/* <button class="btn btn-outline-customer" type="submit" onClick={(e) => setVisible(true)}>Tạo mới</button> */}
                             <nav aria-label="...">
                                 <ul class="pagination mb-0 ml-1">
                                     <li class="page-item disabled">
@@ -588,13 +509,13 @@ export default function OverView(props) {
                 
             </div> */}
             {renderTable()}
-            <Dialog closable={false} header={title} visible={visible} style={{ width: '50vw' }} onHide={() => setVisible(false)} footer={footerContent}>
+            <Dialog header="Sửa" visible={visible} style={{ width: '50vw' }} onHide={() => setVisible(false)} footer={footerContent}>
 
                 <div class="card w-full border-none">
                     {/* <h5>Advanced</h5> */}
                     <div class="formgrid grid">
                         <div class="field col-12 md:col-6">
-                            <label for="firstname61">Name Product</label>
+                            <label for="firstname6">Name Product</label>
                             <InputText
                                 id="Name"
                                 value={detail?.name}
@@ -604,66 +525,41 @@ export default function OverView(props) {
                             />
                         </div>
                         <div class="field col-12 md:col-6">
-                            <label for="lastname62">Link Url</label>
+                            <label for="lastname6">Link Url</label>
                             <InputText
                                 id="Name"
                                 value={detail?.image}
                                 //disabled={readOnly}
                                 onChange={handleChangeLink}
                                 className="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"
-                            />
-                        </div>
+                            />                        </div>
                         <div class="field col-12 md:col-6">
-                            <label for="firstname63">Price</label>
+                            <label for="firstname6">Price</label>
                             <InputNumber
                                 id="Name"
                                 value={detail?.price}
                                 //disabled={readOnly}
                                 onChange={handleChangePrice}
                                 className="text-base text-color surface-overlay surface-border border-round appearance-none outline-none focus:border-primary w-full"
-                            />
-                        </div>
+                            />                        </div>
                         <div class="field col-12 md:col-6">
-                            <label for="lastname64">Discount</label>
+                            <label for="lastname6">Discount</label>
                             <InputNumber
                                 id="Name"
                                 value={detail?.discount}
                                 //disabled={readOnly}
                                 onChange={handleChangeDiscount}
                                 className="text-base text-color surface-overlay surface-border border-round appearance-none outline-none focus:border-primary w-full"
-                            />
-                        </div>
-                        <div class="field col-12 md:col-6">
-                            <label for="lastname65">Loại sản phẩm</label>
-                            <Dropdown
-                                value={detail?.categoryId}
-                                onChange={handleChangeCategoryId}
-                                options={listCategory}
-                                optionLabel="name"
-                                optionValue='id'
-                                placeholder="Chọn loại sản phẩm"
-                                className="text-base text-color surface-overlay surface-border border-round appearance-none outline-none focus:border-primary w-full"
-                            />
-                        </div>
-
-                        {/* <div class="field col-12 md:col-6">
-                            <label for="lastname6">Upload file</label>
-                            <input type="file" id="file" onChange={onUpload} />
-                        </div> */}
-                        {/* <img src={ca}  alt='Đinh Ngọc Ca'></img> */}
-
+                            />                        </div>
                         <div class="field col-12 md:col-12">
-                            <label for="lastname66">Description</label>
-                            {/* <InputText
+                            <label for="lastname6">Description</label>
+                            <InputText
                                 id="Name"
                                 value={detail?.description}
                                 //disabled={readOnly}
                                 onChange={handleChangeDescription}
                                 className="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"
-                            /> */}
-                            <Editor value={TextToHtmlVisable(text)} onTextChange={(e) => setText(e.textValue)} style={{ height: '320px' }} />
-
-                        </div>
+                            />                        </div>
                     </div>
                 </div>
 

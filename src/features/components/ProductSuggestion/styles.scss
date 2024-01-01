@@ -1,0 +1,20 @@
+.render-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.render-content {
+    display: flex;
+    position: absolute;
+    top: 33%;
+    background-color: white;
+}
+
+// .p-carousel-content {
+//     .p-carousel-indicators {
+//         display: none !important;
+//     }
+// }

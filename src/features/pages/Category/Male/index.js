@@ -11,17 +11,19 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
-import { atom_cart, atom_dataProduct } from "../../../recoil/My/atomHandle";
-import { token } from "../../common/Constant";
+import { atom_cart, atom_dataProduct } from "../../../../recoil/My/atomHandle";
+import { token, listCategory } from "../../../common/Constant"
+import { Carousel } from 'primereact/carousel';
+import ProductSuggestion from "../../../components/ProductSuggestion/index"
 import "./styles.scss";
 
-export default function Demo(props) {
+export default function Male(props) {
     const setData_AtomCart = useSetRecoilState(atom_cart)
     const data_AtomCart = useRecoilValue(atom_cart)
 
     const data_atom_dataProduct = useRecoilValue(atom_dataProduct)
 
-    const [dataSuggestion, setDataSuggestion] = useState();
+    const [dataSuggestion, setDataSuggestion] = useState([]);
 
     const dataEmpty =
     {
@@ -74,7 +76,8 @@ export default function Demo(props) {
         size: 18,
         page: 0,
         sort: "id,desc",
-        search: "#"
+        search: "#",
+        category: listCategory[0].id
     });
     const [total, setTotal] = useState(null);
 
@@ -110,7 +113,7 @@ export default function Demo(props) {
         let result = axios.get('http://localhost:8080/product-suggestion-data/get-product-suggestion-data', {
             headers: {
                 "Content-type": "application/json",
-                  "Authorization": `Bearer ${token}`,
+                "Authorization": `Bearer ${token}`,
             },
             // params: lazyParams
         }
@@ -122,8 +125,8 @@ export default function Demo(props) {
 
 
     const getSearchData = () => {
-        //phụ
-        let result = axios.get('http://localhost:8080/product/search', {
+        //get data for male
+        let result = axios.get('http://localhost:8080/product/search/category', {
             headers: {
                 "Content-type": "application/json",
                 "Authorization": `Bearer ${token}`,
@@ -133,6 +136,7 @@ export default function Demo(props) {
         ).then((data) => {
             setData(data.data?.result?.content);
             setTotal(data.data.result?.totalElements);
+            console.log(data.data?.result?.content, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         })
     }
 
@@ -220,7 +224,7 @@ export default function Demo(props) {
                 </div>
                 <div className='productCard__body'>
                     <div className='productCard__body__img'>
-                        <img src={rowdata.image} width='100%' style={{height: "300px"}} alt='hello img' />
+                        <img src={rowdata.image} width='100%' style={{ height: "300px" }} alt='hello img' />
                     </div>
 
                     <div className='productCard__body__content'>
@@ -364,7 +368,6 @@ export default function Demo(props) {
     }
 
     const handleChangeDescription = (e) => {
-        console.log(e, "000000000000000000000000000000")
         applyServiceChange('description', e.target.value)
     }
 
@@ -404,6 +407,59 @@ export default function Demo(props) {
             <button class="btn btn-outline-success" type="submit" onClick={(e) => submitDetele()}>Xóa</button>
         </div>
     );
+
+    const responsiveOptions = [
+        {
+            breakpoint: '1199px',
+            numVisible: 1,
+            numScroll: 1
+        },
+        {
+            breakpoint: '991px',
+            numVisible: 2,
+            numScroll: 1
+        },
+        {
+            breakpoint: '767px',
+            numVisible: 1,
+            numScroll: 1
+        }
+    ];
+
+    const getSeverity = (product) => {
+        switch (product.inventoryStatus) {
+            case 'INSTOCK':
+                return 'success';
+
+            case 'LOWSTOCK':
+                return 'warning';
+
+            case 'OUTOFSTOCK':
+                return 'danger';
+
+            default:
+                return null;
+        }
+    };
+
+    const productTemplate = (product) => {
+        return (
+            <div className="border-1 surface-border border-round m-2 text-center py-5 px-3">
+                <div className="mb-3 flex justify-content-center">
+                    <img src={`${product.image}`} alt={product.name} className="w-6 shadow-2" style={{height: "200px"}} />
+                </div>
+                <div>
+                    <h4 className="mb-1 render-text">{product.name}</h4>
+                    <h6 className="mt-0 mb-3">${product.price}</h6>
+                    {/* <Tag value={product.inventoryStatus} severity={getSeverity(product)}></Tag>
+                    <div className="mt-5 flex flex-wrap gap-2 justify-content-center">
+                        <Button icon="pi pi-search" className="p-button p-button-rounded" />
+                        <Button icon="pi pi-star-fill" className="p-button-success p-button-rounded" />
+                    </div> */}
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div>
@@ -522,11 +578,10 @@ export default function Demo(props) {
                 >
                     c
                 </div> */}
-                {console.log(data_atom_dataProduct, "hhhhhhhhhhhhhhhhhhhhhh")}
                 <div className='layout-center'>
                     <div class="container-fluid">
                         <div class="row">
-                            {data_atom_dataProduct?.content?.map((e) => (
+                            {data?.map((e) => (
                                 rendenCardProduct(e)
                             ))}
                         </div>
@@ -538,22 +593,7 @@ export default function Demo(props) {
                 </div> */}
             </div>
 
-            <div>
-                Gợi ý sản phẩm
-            </div>
-            {console.log(dataSuggestion, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")}
-
-            <div className="layout">
-                <div className='layout-center'>
-                    <div class="container-fluid">
-                        <div class="row">
-                            {dataSuggestion?.map((e) => (
-                                rendenCardProduct(e)
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <ProductSuggestion data={dataSuggestion} detailProduct={detailProduct}></ProductSuggestion>
 
             <Dialog header="Sửa" visible={visible} style={{ width: '50vw' }} onHide={() => setVisible(false)} footer={footerContent}>
 

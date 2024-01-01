@@ -14,6 +14,8 @@ import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
 import { atom_cart, atom_dataProduct } from "../../../recoil/My/atomHandle";
 import Login from '../../pages/Login/index';
 import { token } from "../../common/Constant"
+// import { useNavigate } from "react-router-dom";
+
 
 import "./styles.scss";
 import { redirect } from 'react-router-dom';
@@ -70,6 +72,8 @@ export default function HeaderMy(props) {
     const [detail, setDetail] = useState(dataEmpty);
     const [user, setUser] = useState(userEmpty);
     const [loadding, setLoadding] = useState(false)
+    const [category, setCategory] = useState();
+
     const [lazyParams, setLazyParams] = useState({
         size: 18,
         page: 0,
@@ -85,13 +89,18 @@ export default function HeaderMy(props) {
         [loadding, lazyParams]
     )
 
+    // const navigate = useNavigate();
+    // const routeChange = (path) => {
+    //     navigate(path);
+    // }
+
     const handleLogin = () => {
         setUserVisible(true);
     }
 
     useEffect(() => {
-        console.log(data_AtomCart, "uuuuuuuuuuuuuuuuuuuuuuuuu")
-    }, [data_AtomCart])
+        getAllCategory()
+    }, [])
 
 
     const getSearchData = () => {
@@ -111,6 +120,13 @@ export default function HeaderMy(props) {
             // setData(data.data.result.content);
             // setTotal(data.data.result.totalElements);
         })
+    }
+
+    const getAllCategory = async () => {
+        let _category = [];
+        let result = await axios.get('http://localhost:8080/category/get-all');
+        _category = [...result.data.result]
+        setCategory(result.data.result);
     }
 
     const handleChangeParams = (page) => {
@@ -279,48 +295,55 @@ export default function HeaderMy(props) {
         </div>
     );
 
-    const submitLogin = () => {
-        console.log("wwwwwwwwwwwwwwwwwwwwwwwww")
-        let result = axios.post("http://localhost:8080/user/login",
-            {
-                "username": user.username,
-                "password": user.password
-            }
-        ).then((data) => {
-            if (data.data) {
-                setUserVisible(false);
-                setLogin(data.data)
-                localStorage.setItem("token", data.data.result);
-
-            } else {
-                console.log("failed")
-                localStorage.removeItem("token");
-            }
-        }).catch((ex) => {
-            console.error(ex);
-        })
-    }
-
-    const footerContentUser = (
-        <div>
-            <button class="btn btn-outline-success" type="submit" onClick={(e) => submitLogin()}>Login</button>
-        </div>
-    );
-
     const renderListItemInCart = () => {
         window.location.href = "/cart";
     }
+
+    const renderCategory = (category) => {
+        console.log(category, "22222222222222222222")
+        let href = ""
+        switch (category.id) {
+            case 1:
+                href = "/product/male"
+                break;
+            case 2:
+                href = "/product/female"
+                break;
+            case 3:
+                href = "/product/kids"
+                break;
+            case 4:
+                href = "/product/accessory"
+                break;
+            case 5:
+                href = "/product/beauty"
+                break;
+            default:
+            // Các hành động mặc định khi không có trường hợp nào khớp
+        }
+        return (
+            <li class="nav-item" className="text-gray-600 mx-6">
+                <a class="nav-link" href={href}>{category?.name}</a>
+            </li>
+        )
+    }
+
+    // const navigationProduct = (data) => {
+    //     let _data = { ...data };
+    //     let linkUrl = "/product/detail/" + _data.id;
+    //     routeChange(linkUrl);
+    // }
 
     return (
         <div>
             <div className='t-header'>
                 <div className='t-header-banner'>
                     <div className='t-header-banner-content'>
-                        <div className='header-content-left'>
+                        <a className='header-content-left' href="/product" >
                             <img src="https://pubcdn.ivymoda.com/ivy2/images/logo.png" alt='hello img' />
 
                             {/* <img src="https://1.bp.blogspot.com/-1JPaVHUJnGU/YOQeX2ylZII/AAAAAAAAFa0/2jJttGEW6f0fqL8KEAc6HLWFf3m0JILzACLcBGAsYHQ/logo.png" alt='hello img' /> */}
-                        </div>
+                        </a>
                         <div className='t-header-banner-content-center'>
                             <div className='t-header-banner-content-center-search'>
                                 <input placeholder='Tìm kiếm sản phẩm' className='px-2' onChange={changeSearch}></input>
@@ -376,7 +399,8 @@ export default function HeaderMy(props) {
             </div>
 
             <ul class="nav justify-content-center ">
-                <li class="nav-item mx-5">
+                {category?.map(ca => renderCategory(ca))}
+                {/* <li class="nav-item mx-5">
                     <a class="nav-link active" aria-current="page" href="#">Active</a>
                 </li>
                 <li class="nav-item mx-5">
@@ -387,7 +411,7 @@ export default function HeaderMy(props) {
                 </li>
                 <li class="nav-item mx-5">
                     <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-                </li>
+                </li> */}
             </ul>
             <hr className='mt-1 mb-4'></hr>
 

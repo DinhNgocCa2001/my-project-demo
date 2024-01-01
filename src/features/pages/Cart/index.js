@@ -225,6 +225,10 @@ export default function Cart(props) {
         )
     };
 
+    const renderCheckout = () => {
+        window.location.href = "/checkout";
+    }
+
     // useEffect(() => {
     //     updateOrderItem();
     // }, [])
@@ -239,7 +243,7 @@ export default function Cart(props) {
             <div className='ml-3 text-left text-3xl font-normal mb-3'>
                 Shopping Bag
             </div>
-            <hr className='mb-5 ml-3 mr-2 border-500'></hr>
+            <hr className='mb-5 ml-3 mr-2 border-300'></hr>
             <div
                 // style={{ width: '60%', border: "1px" }} 
                 className='flex'
@@ -265,7 +269,7 @@ export default function Cart(props) {
                                 </div>
                             </div>
                             <div className='text-center mt-1'>
-                                <Button label="Thanh Toán" severity="secondary" outlined style={{ width: "200px" }} />
+                                <Button label="Thanh Toán" severity="secondary" outlined style={{ width: "200px" }} onClick={() => renderCheckout()} />
                             </div>
                             <div className='text-xs	text-left mt-3'>
                                 Rewards will be added to your account once the order has been fully shipped. Rewards amount is subject to change.

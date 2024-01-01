@@ -11,12 +11,14 @@ import _ from "lodash"
 import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from "react-router-dom";
-import { generateRandomId } from '../../common/Constant';
+import { generateRandomId, TextToHTML } from '../../common/Constant';
 import { Dropdown } from 'primereact/dropdown';
 import { atom_cart } from "../../../recoil/My/atomHandle";
 import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
 import { token } from "../../common/Constant"
 import { Toast } from 'primereact/toast';
+import { Editor } from "primereact/editor";
+
 
 
 
@@ -32,7 +34,6 @@ export default function DetailProduct(props) {
     const { id } = useParams();
     let abc = generateRandomId();
 
-    console.log(data_AtomCart, "jjjjjjjjjjjjjjjjjjjjjj")
     const dataEmpty =
     {
         "name": null,
@@ -149,11 +150,11 @@ export default function DetailProduct(props) {
         let _detailBuy = { ...detailBuy };
         _detailBuy.productId = id;
         console.log(_order, "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
-        if(!_order.data.result?.id){
+        if (!_order.data.result?.id) {
             toast.current.show({ severity: 'warn', detail: 'Bạn phải đăng nhập để thêm sản phẩm vào giỏ hàng!' });
             return 0;
         }
- 
+
         _detailBuy.orderId = _order.data.result.id;
         _detailBuy.userId = _order.data.result.userId;
 
@@ -333,16 +334,68 @@ export default function DetailProduct(props) {
 
     const handleChangeColorId = (e) => {
         applyServiceChange('colorId', e.target.value)
+        // let filter = {
+        //     colorId: e.target.value,
+        //     productId: id,
+        // }
+        // getItemSizeContext(filter)
     }
 
     const handleChangeSizeId = (e) => {
         applyServiceChange('sizeId', e.target.value)
+        // let filter = {
+        //     sizeId: e.target.value,
+        //     productId: id,
+        // }
+        // getItemColorContext(filter)
     }
 
 
     const handleChangeQuantity = (e) => {
         applyServiceChange('quantity', e.value)
     }
+
+    const getItemColorContext = (lazyParams) => {
+        let result = axios.get(`http://localhost:8080/product/get-productVariant-by-id-color/context`,
+            {
+                params: lazyParams
+            }
+
+        ).then((data) => {
+            let dataReal = data.data;
+            setColor(dataReal);
+        })
+    }
+
+    const getItemSizeContext = (lazyParams) => {
+        let result = axios.get(`http://localhost:8080/product/get-productVariant-by-id-size/context`,
+            {
+                params: lazyParams
+            }
+        ).then((data) => {
+            let dataReal = data.data;
+            setSize(dataReal);
+        })
+    }
+
+    // const getSearchData = () => {
+    //     // chính
+    //     let result = axios.get('http://localhost:8080/product/search', {
+    //         headers: {
+    //             "Content-type": "application/json",
+    //             "Authorization": `Bearer ${token}`,
+    //         },
+    //         params: lazyParams
+    //     }
+    //     ).then((data) => {
+    //         // setData(data.data);
+    //         // setTotal(data.data.totalElements);
+    //         console.log(data?.data?.result?.content, "aaaaaaaaaaaaaaaaaaaa")
+    //         setData_atom_dataProduct(data?.data?.result)
+    //         // setData(data.data.result.content);
+    //         // setTotal(data.data.result.totalElements);
+    //     })
+    // }
 
     return (
         <div className='abc'>
@@ -402,7 +455,7 @@ export default function DetailProduct(props) {
 
                     </div>
                     <div className='detail_left_imageLagre'>
-                        <img src={detail?.image} width='350' height='550' alt='hello img' />
+                        <img src={detail?.image} width='350' style={{ height: "550px" }} alt='hello img' />
                     </div>
                 </div>
                 <div className='detai_center'>
@@ -460,6 +513,14 @@ export default function DetailProduct(props) {
                             disabled={visibleAddCart}
                             onClick={(e) => addOrderItem()}>Thêm vào giỏ hàng</button>
                     </div>
+                </div>
+            </div>
+            <div className='text-left' style={{ "margin-left": '150px' }}>
+                <div className='text-3xl bg-bluegray-100 mb-4'>
+                    Mô tả sản phẩm
+                </div>
+                <div className='mx-2'>
+                    {TextToHTML(detail?.description)}
                 </div>
             </div>
             <Toast ref={toast} position="top-right" />

@@ -11,17 +11,19 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
-import { atom_cart, atom_dataProduct } from "../../../recoil/My/atomHandle";
-import { token } from "../../common/Constant";
+import { atom_cart, atom_dataProduct } from "../../../../recoil/My/atomHandle";
+import { token, listCategory } from "../../../common/Constant"
+import ProductSuggestion from "../../../components/ProductSuggestion/index"
+
 import "./styles.scss";
 
-export default function Demo(props) {
+export default function Female(props) {
     const setData_AtomCart = useSetRecoilState(atom_cart)
     const data_AtomCart = useRecoilValue(atom_cart)
 
     const data_atom_dataProduct = useRecoilValue(atom_dataProduct)
 
-    const [dataSuggestion, setDataSuggestion] = useState();
+    const [dataSuggestion, setDataSuggestion] = useState([]);
 
     const dataEmpty =
     {
@@ -38,7 +40,7 @@ export default function Demo(props) {
         "username": null,
         "password": null
     }
-    const [data, setData] = useState(null);
+    const [data, setData] = useState([]);
     const [visible, setVisible] = useState(false);
     const [visibleDelete, setVisibleDelete] = useState(false);
     const [userVisible, setUserVisible] = useState(false);
@@ -74,7 +76,8 @@ export default function Demo(props) {
         size: 18,
         page: 0,
         sort: "id,desc",
-        search: "#"
+        search: "#",
+        category: listCategory[1].id
     });
     const [total, setTotal] = useState(null);
 
@@ -101,16 +104,12 @@ export default function Demo(props) {
         setUserVisible(true);
     }
 
-    useEffect(() => {
-        console.log(data_AtomCart, "uuuuuuuuuuuuuuuuuuuuuuuuu")
-    }, [data_AtomCart])
-
     const getDataSuggestion = () => {
         //phụ
         let result = axios.get('http://localhost:8080/product-suggestion-data/get-product-suggestion-data', {
             headers: {
                 "Content-type": "application/json",
-                  "Authorization": `Bearer ${token}`,
+                "Authorization": `Bearer ${token}`,
             },
             // params: lazyParams
         }
@@ -123,7 +122,7 @@ export default function Demo(props) {
 
     const getSearchData = () => {
         //phụ
-        let result = axios.get('http://localhost:8080/product/search', {
+        let result = axios.get('http://localhost:8080/product/search/category', {
             headers: {
                 "Content-type": "application/json",
                 "Authorization": `Bearer ${token}`,
@@ -131,7 +130,7 @@ export default function Demo(props) {
             params: lazyParams
         }
         ).then((data) => {
-            setData(data.data?.result?.content);
+            setData(data.data?.result);
             setTotal(data.data.result?.totalElements);
         })
     }
@@ -220,7 +219,7 @@ export default function Demo(props) {
                 </div>
                 <div className='productCard__body'>
                     <div className='productCard__body__img'>
-                        <img src={rowdata.image} width='100%' style={{height: "300px"}} alt='hello img' />
+                        <img src={rowdata.image} width='100%' style={{ height: "300px" }} alt='hello img' />
                     </div>
 
                     <div className='productCard__body__content'>
@@ -364,7 +363,6 @@ export default function Demo(props) {
     }
 
     const handleChangeDescription = (e) => {
-        console.log(e, "000000000000000000000000000000")
         applyServiceChange('description', e.target.value)
     }
 
@@ -506,7 +504,7 @@ export default function Demo(props) {
                                 <li class="page-item disabled">
                                     <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
                                 </li>
-                                {renderPageItem(data_atom_dataProduct)}
+                                {renderPageItem(data)}
                                 <li class="page-item">
                                     <a class="page-link" href="#">Next</a>
                                 </li>
@@ -526,7 +524,7 @@ export default function Demo(props) {
                 <div className='layout-center'>
                     <div class="container-fluid">
                         <div class="row">
-                            {data_atom_dataProduct?.content?.map((e) => (
+                            {data?.content?.map((e) => (
                                 rendenCardProduct(e)
                             ))}
                         </div>
@@ -537,13 +535,9 @@ export default function Demo(props) {
                     a
                 </div> */}
             </div>
+            <ProductSuggestion data={dataSuggestion} detailProduct={detailProduct}></ProductSuggestion>
 
-            <div>
-                Gợi ý sản phẩm
-            </div>
-            {console.log(dataSuggestion, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")}
-
-            <div className="layout">
+            {/* <div className="layout">
                 <div className='layout-center'>
                     <div class="container-fluid">
                         <div class="row">
@@ -553,7 +547,7 @@ export default function Demo(props) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             <Dialog header="Sửa" visible={visible} style={{ width: '50vw' }} onHide={() => setVisible(false)} footer={footerContent}>
 

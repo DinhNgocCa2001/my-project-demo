@@ -12,6 +12,11 @@ import axios from 'axios';
 import { useParams } from "react-router-dom";
 import { generateRandomId } from '../../common/Constant';
 import { Dropdown } from 'primereact/dropdown';
+import { Checkbox } from 'primereact/checkbox';
+
+import { useSetRecoilState, useRecoilState, useRecoilValue } from "recoil";
+import { refreshData } from "../../../recoil/My/atomHandle";
+
 import { TabView, TabPanel } from 'primereact/tabview';
 import React, {
     forwardRef,
@@ -37,6 +42,8 @@ export default function Login(props) {
         "email": null,
         "password": null
     }
+    const setRefreshData = useSetRecoilState(refreshData);
+
     const [login, setLogin] = useState(userEmpty);
     // const [userVisible, setUserVisible] = useState(false);
     const [user, setUser] = useState(userEmpty);
@@ -49,20 +56,40 @@ export default function Login(props) {
                 "password": user.password
             }
         ).then((data) => {
-            if (data.data) {
+            console.log(data, "uuuuuuuuuuuuuuuuuuuuuuuuuu")
+            if (data.data.code == "00") {
                 setUserVisible(false);
                 setLogin(data.data)
                 setError('')
                 localStorage.setItem("token", data.data.result);
+                setUser({});
             } else {
                 // message.error("Đăng nhập không thành công")
-                setError("Đăng nhập không thành công")
+                setError("Đăng nhập không thành công: Vui lòng kiểm tra lại tài khoản và mật khẩu")
                 localStorage.removeItem("token");
             }
         }).catch((ex) => {
             console.error(ex);
         })
     }
+
+    const createUser = async () => {
+        let result = await axios.post("http://localhost:8080/user/create", user);
+
+        if (!result.data?.result) {
+            setError("Tài khoản đã tồn tại")
+            localStorage.removeItem("token");
+        } else {
+            setUserVisible(false);
+            // setLogin(data.data)
+            setError('')
+            localStorage.setItem("token", result.data?.result);
+            setUser({});
+            setRefreshData(Math.random());
+        }
+
+    }
+
     const applyServiceChangeUser = (prop, val) => {
         let _detail = _.cloneDeep(user)
 
@@ -78,6 +105,33 @@ export default function Login(props) {
     const handleChangePassword = (e) => {
         applyServiceChangeUser('password', e.target.value)
     }
+
+    //// create account
+
+    const handleChangeFirstName = (e) => {
+        applyServiceChangeUser('firstName', e.target.value)
+    }
+
+    const handleChangeLastName = (e) => {
+        applyServiceChangeUser('lastName', e.target.value)
+    }
+
+    const handleChangeEmail = (e) => {
+        applyServiceChangeUser('email', e.target.value)
+    }
+
+    const handleChangeDateOfBirth = (e) => {
+        applyServiceChangeUser('dateOfBirth', e.target.value)
+    }
+
+    const handleChangeAddress = (e) => {
+        applyServiceChangeUser('address', e.target.value)
+    }
+
+    const handleChangeSex = (e) => {
+        applyServiceChangeUser('sex', e.value)
+    }
+
 
 
     // useImperativeHandle(ref, () => ({
@@ -425,7 +479,7 @@ export default function Login(props) {
                                     Welcome back!
                                 </h2>
                             </div> */}
-                        <h2 className="text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+                        <h2 className="text-center text-base leading-9 tracking-tight text-yellow-500">
                             Welcome back!
                         </h2>
                         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
@@ -445,7 +499,7 @@ export default function Login(props) {
                                             type="email"
                                             autoComplete="email"
                                             required
-                                            className="block w-full rounded-md border-0 px-1 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                            className="block w-full border-0 border-round px-1 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                             onChange={handleChangeUsername}
                                         />
                                     </div>
@@ -469,7 +523,7 @@ export default function Login(props) {
                                             type="password"
                                             autoComplete="current-password"
                                             required
-                                            className="block w-full rounded-md border-0 px-1 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                            className="block w-full border-0 border-round px-1 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                             onChange={handleChangePassword}
                                         />
                                     </div>
@@ -479,14 +533,14 @@ export default function Login(props) {
                                     <button
                                         // type="submit"
                                         onClick={() => submitLogin()}
-                                        className="flex w-full justify-center rounded-md bg-secondary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gradient focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                        className="flex w-full justify-center bg-secondary border-round px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gradient focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                     >
                                         Sign in
                                     </button>
                                 </div>
                             </div>
 
-                            <p className="mt-10 text-center text-sm text-gray-500">
+                            <p className="mt-10 text-right text-sm text-red-500">
                                 {error}
                             </p>
 
@@ -500,12 +554,128 @@ export default function Login(props) {
                     </div>
                 </TabPanel>
                 <TabPanel header="Sign Up">
-                    <p className="m-0">
-                        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam,
-                        eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo
-                        enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui
-                        ratione voluptatem sequi nesciunt. Consectetur, adipisci velit, sed quia non numquam eius modi.
-                    </p>
+                    <div className="">
+                        <h2 className="text-center text-base leading-9 tracking-tight text-yellow-500">
+                            Get up to 2% back on every purchase!
+                        </h2>
+                        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+                            <div class="row g-3">
+                                <div class="col">
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="First name"
+                                        aria-label="First name"
+                                        onChange={handleChangeFirstName}
+                                    />
+                                </div>
+                                <div class="col">
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Last name"
+                                        aria-label="Last name"
+                                        onChange={handleChangeLastName}
+                                    />
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col">
+                                    <input
+                                        type="Email"
+                                        class="form-control"
+                                        placeholder="Email"
+                                        aria-label="First name"
+                                        onChange={handleChangeEmail}
+                                    />
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col">
+                                    <input
+                                        type="password"
+                                        class="form-control"
+                                        placeholder="Password"
+                                        aria-label="First name"
+                                        onChange={handleChangePassword}
+                                    />
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col">
+                                    <input
+                                        type="date"
+                                        class="form-control"
+                                        placeholder="Date Of Birth"
+                                        aria-label="First name"
+                                        onChange={handleChangeDateOfBirth}
+                                    />
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col">
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Address"
+                                        aria-label="First name"
+                                        onChange={handleChangeAddress}
+                                    />
+                                </div>
+                            </div>
+                            <div class="row g-3 pl-2 flex flex-wrap justify-content-left gap-3">
+                                <div className="flex align-items-center">
+                                    <Checkbox
+                                        inputId="ingredient1"
+                                        name="pizza"
+                                        value="0"
+                                        onChange={handleChangeSex}
+                                        checked={user?.sex == 0 ? true : false}
+                                    />
+                                    <label htmlFor="ingredient1" className="ml-2">Male</label>
+                                </div>
+                                <div className="flex align-items-center">
+                                    <Checkbox
+                                        inputId="ingredient2"
+                                        name="pizza"
+                                        value="1"
+                                        onChange={handleChangeSex}
+                                        checked={user?.sex == 1 ? true : false}
+                                    />
+                                    <label htmlFor="ingredient2" className="ml-2">Female</label>
+                                </div>
+                                <div className="flex align-items-center">
+                                    <Checkbox
+                                        inputId="ingredient2"
+                                        name="pizza"
+                                        value="2"
+                                        onChange={handleChangeSex}
+                                        checked={user?.sex == 2 ? true : false}
+                                    />
+                                    <label htmlFor="ingredient2" className="ml-2">Orther</label>
+                                </div>
+                            </div>
+                            <div className='mt-3'>
+                                <button
+                                    // type="submit"
+                                    onClick={() => createUser()}
+                                    className="flex w-full justify-center border-round bg-secondary py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gradient focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                >
+                                    Create Account
+                                </button>
+                            </div>
+                            <p className="mt-10 text-right text-sm text-red-500">
+                                {error}
+                            </p>
+
+                            <p className="mt-10 text-center text-sm text-gray-500">
+                                Not a member?{' '}
+                                <a href="#" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+                                    Start a 14 day free trial
+                                </a>
+                            </p>
+                        </div>
+                    </div>
                 </TabPanel>
             </TabView>
             {/* </div> */}

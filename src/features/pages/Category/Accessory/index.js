@@ -11,11 +11,12 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
-import { atom_cart, atom_dataProduct } from "../../../recoil/My/atomHandle";
-import { token } from "../../common/Constant";
+import { atom_cart, atom_dataProduct } from "../../../../recoil/My/atomHandle";
+import { token, listCategory } from "../../../common/Constant"
+import ProductSuggestion from "../../../components/ProductSuggestion/index"
 import "./styles.scss";
 
-export default function Demo(props) {
+export default function Accessory(props) {
     const setData_AtomCart = useSetRecoilState(atom_cart)
     const data_AtomCart = useRecoilValue(atom_cart)
 
@@ -74,7 +75,8 @@ export default function Demo(props) {
         size: 18,
         page: 0,
         sort: "id,desc",
-        search: "#"
+        search: "#",
+        category: listCategory[3].id
     });
     const [total, setTotal] = useState(null);
 
@@ -123,7 +125,7 @@ export default function Demo(props) {
 
     const getSearchData = () => {
         //phụ
-        let result = axios.get('http://localhost:8080/product/search', {
+        let result = axios.get('http://localhost:8080/product/search/category', {
             headers: {
                 "Content-type": "application/json",
                 "Authorization": `Bearer ${token}`,
@@ -131,7 +133,7 @@ export default function Demo(props) {
             params: lazyParams
         }
         ).then((data) => {
-            setData(data.data?.result?.content);
+            setData(data.data?.result);
             setTotal(data.data.result?.totalElements);
         })
     }
@@ -364,7 +366,6 @@ export default function Demo(props) {
     }
 
     const handleChangeDescription = (e) => {
-        console.log(e, "000000000000000000000000000000")
         applyServiceChange('description', e.target.value)
     }
 
@@ -506,7 +507,7 @@ export default function Demo(props) {
                                 <li class="page-item disabled">
                                     <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
                                 </li>
-                                {renderPageItem(data_atom_dataProduct)}
+                                {renderPageItem(data)}
                                 <li class="page-item">
                                     <a class="page-link" href="#">Next</a>
                                 </li>
@@ -526,7 +527,7 @@ export default function Demo(props) {
                 <div className='layout-center'>
                     <div class="container-fluid">
                         <div class="row">
-                            {data_atom_dataProduct?.content?.map((e) => (
+                            {data?.content?.map((e) => (
                                 rendenCardProduct(e)
                             ))}
                         </div>
@@ -538,22 +539,7 @@ export default function Demo(props) {
                 </div> */}
             </div>
 
-            <div>
-                Gợi ý sản phẩm
-            </div>
-            {console.log(dataSuggestion, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")}
-
-            <div className="layout">
-                <div className='layout-center'>
-                    <div class="container-fluid">
-                        <div class="row">
-                            {dataSuggestion?.map((e) => (
-                                rendenCardProduct(e)
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <ProductSuggestion data={dataSuggestion} detailProduct={detailProduct}></ProductSuggestion>
 
             <Dialog header="Sửa" visible={visible} style={{ width: '50vw' }} onHide={() => setVisible(false)} footer={footerContent}>
 

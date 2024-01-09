@@ -137,3 +137,8 @@ export const atom_dataProduct = atom({
   key: "atom_dataProduct",
   default: [],
 });
+
+export const token_global = atom({
+  key: "token_global",
+  default: "",
+});

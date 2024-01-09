@@ -11,6 +11,7 @@ import OverView from './features/pages/OverView';
 import UserAdministration from './features/pages/UserAdministration/index';
 
 import DetailProduct from './features/pages/DetailProduct'
+import DetailAdProduct from './features/pages/DetailAdProduct/index'
 import InvoiedProduct from './features/components/invoied';
 import { RecoilRoot } from 'recoil';
 import HeaderMy from './features/components/HeaderMy/index'
@@ -41,7 +42,8 @@ function App() {
         </div>
         <BrowserRouter>
           <Routes>
-            <Route index path="/overview" element={<OverView />} />
+            <Route index path="/admin-product" element={<OverView />} />
+            <Route index path="/admin-product/detail/:id" element={<DetailAdProduct />} />
             <Route path="/product" element={<Demo />} />
             <Route path="/product/detail/:id" element={<DetailProduct />} />
             {/* <Route path="/login" element={<Login />} /> */}

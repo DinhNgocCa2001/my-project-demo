@@ -10,7 +10,7 @@ import _ from "lodash"
 import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from "react-router-dom";
-import { formattedAmount } from '../../common/Constant';
+import { formattedAmount, listRole } from '../../common/Constant';
 import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
 import { atom_cart } from "../../../recoil/My/atomHandle";
 import { token } from "../../common/Constant"
@@ -25,6 +25,9 @@ import { Panel } from 'primereact/panel';
 
 import { Toast } from 'primereact/toast';
 
+import { Checkbox } from 'primereact/checkbox';
+
+
 
 
 
@@ -37,6 +40,26 @@ export default function Checkout(props) {
     const [itemCart, setItemCart] = useState([]);
     const [loadding, setLoadding] = useState(false);
     const [total, setTotal] = useState();
+
+    const userEmpty =
+    {
+        "address": null,
+        "cardName": null,
+        "cardNumber": null,
+        "expirationDate": null,
+        "firstName": null,
+        "lastName": null,
+        "phone": null,
+    }
+
+    const [user, setUser] = useState(userEmpty);
+
+    const applyServiceChange = (prop, val) => {
+        let _detail = _.cloneDeep(user)
+        _detail[prop] = val
+        setUser(_detail)
+        //performValidate([prop], _detail)
+    }
 
     console.log(data_AtomCart, "oooooooooooooooooooooooooooooooooo")
     const _data_AtomCart = [
@@ -67,11 +90,10 @@ export default function Checkout(props) {
     };
 
     const applyServiceChangeUser = (prop, val) => {
-        // let _detail = _.cloneDeep(user)
-
-        // _detail[prop] = val
-
-        // setUser(_detail)
+        let _detail = _.cloneDeep(user)
+        _detail[prop] = val
+        setUser(_detail)
+        console.log(_detail, "99999999999999999999999999999")
         //performValidate([prop], _detail)
     }
     const handleChangeQuantity = async (e, product) => {
@@ -80,7 +102,6 @@ export default function Checkout(props) {
             let item = _itemCart.filter(o => o.id === product.id)
             let _item = { ...item[0] };
             _item.quantity = e.target.value;
-            console.log(_item, "8888888888888888888")
             let result = await axios.post(`http://localhost:8080/order-item/update-order-item`,
                 _item,
                 {
@@ -99,6 +120,50 @@ export default function Checkout(props) {
             console.log(result, "ddddddddddddddddddddddđ")
             setLoadding(!loadding)
         }
+    }
+
+    const handleChangeFirstName = (e) => {
+        applyServiceChangeUser('firstName', e.target.value)
+    }
+
+    const handleChangeCardNumber = (e) => {
+        applyServiceChangeUser('cardNumber', e.target.value)
+    }
+
+    const handleChangecvv = (e) => {
+        applyServiceChangeUser('cvv', e.target.value)
+    }
+
+    const handleChangeCardName = (e) => {
+        applyServiceChangeUser('cardName', e.target.value)
+    }
+
+    const handleChangeLastName = (e) => {
+        applyServiceChangeUser('lastName', e.target.value)
+    }
+
+    const handleChangeEmail = (e) => {
+        applyServiceChangeUser('email', e.target.value)
+    }
+
+    const handleChangeExpirationDate = (e) => {
+        applyServiceChangeUser('expirationDate', e.target.value)
+    }
+
+    const handleChangeAddress = (e) => {
+        applyServiceChangeUser('address', e.target.value)
+    }
+
+    const handleChangePhone = (e) => {
+        applyServiceChangeUser('phone', e.target.value)
+    }
+
+    const handleChangeSex = (e) => {
+        applyServiceChangeUser('sex', e.value)
+    }
+
+    const handleChangeRoleId = (e) => {
+        applyServiceChange('roleId', e.target.value)
     }
 
     const updateOrderItem = async () => {
@@ -239,7 +304,7 @@ export default function Checkout(props) {
                 }
             }
         );
-        if(result.data?.result == "Done"){
+        if (result.data?.result == "Done") {
             toast.current.show({ severity: 'Success', detail: 'Đơn hàng đang được xử lý!' });
         } else {
             toast.current.show({ severity: 'Error', detail: 'Tạo đơn hàng thất bại!' });
@@ -272,6 +337,124 @@ export default function Checkout(props) {
 
                     // sortField={sortField} sortOrder={sortOrder} 
                     />
+                    <div className='ml-4' style={{ "padding-left": "1px" }}>
+                        <div className='text-left bg-gray-100 text-2xl mt-10'>
+                            Địa chỉ nhận hàng
+                        </div>
+                        <div className="mt-10">
+                            <div class="row g-3">
+                                <div class="col">
+                                    <input
+                                        defaultValue={user?.firstName}
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="First name"
+                                        aria-label="First name"
+                                        onChange={handleChangeFirstName}
+                                    />
+                                </div>
+                                <div class="col">
+                                    <input
+                                        defaultValue={user?.lastName}
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Last name"
+                                        aria-label="Last name"
+                                        onChange={handleChangeLastName}
+                                    />
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col">
+                                    <input
+                                        defaultValue={user?.address}
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Address"
+                                        aria-label="First name"
+                                        onChange={handleChangeAddress}
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col">
+                                    <input
+                                        defaultValue={user?.phone}
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Phone Number"
+                                        aria-label="First name"
+                                        onChange={handleChangePhone}
+                                    />
+                                </div>
+                            </div>
+                            <p className="mt-10 text-right text-sm text-red-500">
+                                {/* {error} */}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className='ml-4' style={{ "padding-left": "1px" }}>
+                        <div className='text-left bg-gray-100 text-2xl mt-10'>
+                            Phương thức thanh toán
+                        </div>
+                        <div className="mt-10">
+                            <div class="row g-3">
+                                <div class="col">
+                                    <input
+                                        defaultValue={user?.cardName}
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Tên tài khoản"
+                                        aria-label="First name"
+                                        onChange={handleChangeCardName}
+                                    />
+                                </div>
+                                <div class="col">
+                                    <input
+                                        defaultValue={user?.cardNumber}
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Số tài khoản"
+                                        aria-label="First name"
+                                        onChange={handleChangeCardNumber}
+                                    />
+                                </div>
+                            </div>
+                            <div className='row g-3'>
+                                <div class="col">
+                                    <input
+                                        defaultValue={user?.cvv}
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="CVV"
+                                        aria-label="First name"
+                                        onChange={handleChangecvv}
+                                    />
+                                </div>
+
+                                <div class="col">
+                                    <input
+                                        defaultValue={user?.expirationDate}
+                                        type="date"
+                                        class="form-control"
+                                        placeholder="Ngày hết hạn"
+                                        aria-label="First name"
+                                        onChange={handleChangeExpirationDate}
+                                    />
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col">
+                                    <img className='h-5rem' src="https://png2.cleanpng.com/sh/26ef0f56a9b1bb88d11b90fed6b782cb/L0KzQYm3UsA1N51ofZH0aYP2gLBuTf1ie6VqitVqcnSwgLLCjfVvfF57geVqLXP1dbXwlL1kaaNpRdd2dj3mgrbrigQua5J3fJ9BaYPkPbL1hL1uaaR5feQ2Y3H1dH77kvFve6Fmitd3dD3lcbTyh702aWg8etQ9YUa7cbW7Ub42PWc9TqMCOUG4QYiAWcYyP2E5SqoDLoDxd1==/kisspng-mastercard-payment-visa-credit-card-emv-credit-card-visa-and-master-card-transparent-backg-5a77bb4a68ad41.5568617915177961704288.png"></img>
+                                </div>
+                            </div>
+                            <p className="mt-10 text-right text-sm text-red-500">
+                                {/* {error} */}
+                            </p>
+                        </div>
+                    </div>
                 </div>
                 <div className='w-4'>
                     <div className='w-11 ml-5'>
@@ -285,7 +468,7 @@ export default function Checkout(props) {
                                 </div>
                             </div>
                             <div className='text-center mt-1'>
-                                <Button label="Thanh Toán" severity="secondary" outlined style={{ width: "200px" }} onClick={() => checkout()} />
+                                <Button label="Đặt hàng" severity="secondary" outlined style={{ width: "200px" }} onClick={() => checkout()} />
                             </div>
                             <div className='text-xs	text-left mt-3'>
                                 Rewards will be added to your account once the order has been fully shipped. Rewards amount is subject to change.

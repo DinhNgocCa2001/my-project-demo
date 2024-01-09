@@ -16,6 +16,10 @@ import { Tag } from 'primereact/tag';
 import { Dropdown } from 'primereact/dropdown';
 import { Image } from 'primereact/image';
 import { Editor } from 'primereact/editor';
+import { useNavigate } from "react-router-dom";
+
+import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
+import { refreshData, token_global } from "../../../recoil/My/atomHandle";
 
 
 import { SplitButton } from 'primereact/splitbutton';
@@ -23,7 +27,7 @@ import { Toast } from 'primereact/toast';
 
 import { FileUpload } from 'primereact/fileupload';
 
-import ca  from "../../../assets/1317711.jpeg"
+import ca from "../../../assets/1317711.jpeg"
 
 
 import "./styles.scss";
@@ -47,6 +51,8 @@ export default function OverView(props) {
     const [dataOld, setDataOld] = useState(null);
     const [text, setText] = useState("");
     const [title, setTitle] = useState("Tạo mới");
+
+    const token_global_component = useRecoilValue(token_global);
 
 
 
@@ -78,7 +84,7 @@ export default function OverView(props) {
         () => {
             getSearchData();
         },
-        [loadding, lazyParams]
+        [loadding, lazyParams, token_global_component]
     )
     const hanleChangeStatus = async (product) => {
         let _product = { ...product };
@@ -99,6 +105,11 @@ export default function OverView(props) {
         setLoadding(!loadding);
     }
 
+    const navigate = useNavigate();
+    const routeChange = (path) => {
+        navigate(path);
+    }
+
 
     const getSearchData = async () => {
         // phụ
@@ -106,7 +117,7 @@ export default function OverView(props) {
         let result = await axios.get('http://localhost:8080/product/ad/search', {
             headers: {
                 "Content-type": "application/json",
-                "Authorization": `Bearer ${token}`,
+                "Authorization": `Bearer ${token_global_component}`,
             },
             params: lazyParams
         });
@@ -188,6 +199,14 @@ export default function OverView(props) {
         return `#${product?.id}`;
     };
 
+    const nameTemplate = (product) => {
+        return(
+            <div onClick={(e) => detailProduct(product)} style={{cursor: "pointer"}}>
+                {product?.name}
+            </div>
+        )
+    };
+
     const priceBodyTemplate = (product) => {
         return formattedAmount(product?.price);
     };
@@ -206,9 +225,9 @@ export default function OverView(props) {
     };
 
     const hanleVisibleUpdate = async (product) => {
-        if(product.id){
+        if (product.id) {
             setTitle("Sửa")
-        }else{
+        } else {
             setTitle("Tạo mới")
         }
         setVisible(true)
@@ -217,7 +236,7 @@ export default function OverView(props) {
     }
 
     const hanleUpdateProduct = async (product) => {
-        
+
         let _product = { ...product };
         _product.createdAt = null;
         _product.updatedAt = null;
@@ -239,7 +258,7 @@ export default function OverView(props) {
     const actionTemplate = (product) => {
         const items = [
             {
-                label: 'Update',
+                label: 'Sửa',
                 icon: 'pi pi-refresh',
                 command: () => {
                     hanleVisibleUpdate(product)
@@ -247,7 +266,7 @@ export default function OverView(props) {
                 }
             },
             {
-                label: 'Change status',
+                label: 'Thay đổi trạng thái',
                 icon: 'pi pi-times',
                 command: () =>
                     hanleChangeStatus(product)
@@ -261,6 +280,12 @@ export default function OverView(props) {
 
         />;
     };
+
+    const detailProduct = (data) => {
+        let _data = { ...data };
+        let linkUrl = "/admin-product/detail/" + _data.id;
+        routeChange(linkUrl);
+    }
 
     const getSeverity = (product) => {
         switch (product?.status) {
@@ -282,58 +307,28 @@ export default function OverView(props) {
 
         return (
             <div className='uuu'>
-                {/* <DataTable
-                    value={data?.content}
-                    dataKey="id"
-                    // resize column
-                    resizableColumns
-                    columnResizeMode="expand"
-
-                    scrollable scrollHeight="400px"
-
-                    // scrollable
-                    // scrollDirection="both"
-                    // scrollHeight="flex"
-                    lazy
-                    // paginator
-                    // rowsPerPageOptions={[20, 25, 50, 100, 150]}
-                    // paginatorTemplate="RowsPerPageDropdown CurrentPageReport FirstPageLink PrevPageLink NextPageLink LastPageLink"
-                    // currentPageReportTemplate="{first} - {last} of {totalRecords}"
-                    // sort
-                    reorderableColumns
-                    reorderableRows
-                >
-                    <Column field="id" header="id"></Column>
-                    <Column field="name" header="Name"></Column>
-                    <Column field="price" header="price"></Column>
-                    <Column field="status" header="status"></Column>
-                </DataTable> */}
-
                 <DataTable
                     value={data}
                     // header={header}
                     // footer={footer}
                     tableStyle={{ minWidth: '100%' }}
-                // onPage={onPage}
-                // paginator rows={5} rowsPerPageOptions={[5, 10, 25, 50]}
-
                 >
                     <Column field="id" header="id" body={idTemplate}></Column>
-                    <Column field="name" header="Name"></Column>
-                    <Column header="Image" body={imageBodyTemplate}></Column>
-                    <Column field="price" header="Price" body={priceBodyTemplate}></Column>
+                    <Column field="name" header="Tên sản phẩm" body={nameTemplate}></Column>
+                    <Column header="Hình ảnh" body={imageBodyTemplate}></Column>
+                    <Column field="price" header="Giá" body={priceBodyTemplate}></Column>
 
-                    <Column field="discount" header="Discount" body={discountBodyTemplate}></Column>
+                    <Column field="discount" header="Giảm giá" body={discountBodyTemplate}></Column>
 
 
                     <Column field="soldQuantity" header="Số lượng trong kho"></Column>
                     <Column field="cartQuantity" header="Số lượng trong giỏ hàng"></Column>
                     <Column field="stock" header="Số lượng đã bán"></Column>
 
-                    <Column field="category" header="Category" body={categoryTemplate}></Column>
+                    <Column field="category" header="Danh mục" body={categoryTemplate}></Column>
                     {/* <Column field="rating" header="Reviews" body={ratingBodyTemplate}></Column> */}
-                    <Column header="Status" body={statusBodyTemplate}></Column>
-                    <Column header="Action" body={actionTemplate}></Column>
+                    <Column header="Trạng thái" body={statusBodyTemplate}></Column>
+                    <Column header="Hành động" body={actionTemplate}></Column>
                 </DataTable>
             </div>
         )
@@ -551,10 +546,15 @@ export default function OverView(props) {
     };
 
     return (
-        <div className='abc'>
-            <div className='def'>
+        <div className='abc mx-1'>
+            <div className='def mb-1'>
                 <div className='header'>
-                    <div className='header-navbar flex justify-content-end'>
+                    <div className='header-navbar flex w-full'>
+                        <div className='header-navbar-left'>
+                            <div className='t-header-banner-content-center-search'>
+                                <input placeholder='Tìm kiếm sản phẩm' className='px-2' onChange={changeSearch}></input>
+                            </div>
+                        </div>
                         <div className='header-navbar-right'>
                             <button class="btn btn-outline-customer" type="submit" onClick={(e) => setVisible(true)}>Tạo mới</button>
                             <nav aria-label="...">
@@ -589,7 +589,6 @@ export default function OverView(props) {
             </div> */}
             {renderTable()}
             <Dialog closable={false} header={title} visible={visible} style={{ width: '50vw' }} onHide={() => setVisible(false)} footer={footerContent}>
-
                 <div class="card w-full border-none">
                     {/* <h5>Advanced</h5> */}
                     <div class="formgrid grid">

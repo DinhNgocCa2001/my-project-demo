@@ -118,7 +118,7 @@ export default function Kids(props) {
             // params: lazyParams
         }
         ).then((data) => {
-            setDataSuggestion(data.data);
+            setDataSuggestion(data.data.result);
             // setTotal(data.data.result?.totalElements);
         })
     }

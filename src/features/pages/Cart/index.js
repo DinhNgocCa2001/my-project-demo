@@ -135,7 +135,7 @@ export default function Cart(props) {
                     <img className="w-9 sm:w-16rem xl:w-10rem shadow-2 block xl:block mx-auto border-round" src={product?.productImage} alt={product.productName} />
                     <div className="flex flex-column sm:flex-row justify-content-between align-items-center xl:align-items-start flex-1 gap-4">
                         <div className="flex flex-column align-items-center sm:align-items-start gap-3">
-                            <div className="text-2xl font-bold text-900">{product?.productName}</div>
+                            <div className="text-2xl font-bold text-900 text-overflow-ellipsis w-25rem text-left">{product?.productName}</div>
                             <div className='text-xs	text-left'>
                                 Thường giao hàng sau 4 - 8 ngày
                             </div>
@@ -269,7 +269,7 @@ export default function Cart(props) {
                                 </div>
                             </div>
                             <div className='text-center mt-1'>
-                                <Button label="Thanh Toán" severity="secondary" outlined style={{ width: "200px" }} onClick={() => renderCheckout()} />
+                                <Button label="Đến trang đặt hàng" severity="secondary" outlined style={{ width: "220px" }} onClick={() => renderCheckout()} />
                             </div>
                             <div className='text-xs	text-left mt-3'>
                                 Rewards will be added to your account once the order has been fully shipped. Rewards amount is subject to change.

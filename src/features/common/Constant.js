@@ -41,6 +41,21 @@ export const listCategory = [
     },
 ]
 
+export const listRole = [
+    {
+        id: 1,
+        name: "Admin"
+    },
+    {
+        id: 2,
+        name: "User"
+    },
+    {
+        id: 3,
+        name: "Staff"
+    }
+]
+
 export const formattedDate = (dateString) => {
     var dateParts = dateString.split("-");
     var formattedDate = dateParts[2] + "-" + dateParts[1] + "-" + dateParts[0];
@@ -62,4 +77,24 @@ export const TextToHtmlVisable = (text) => {
     const paragraphs = text.split('\n').filter(Boolean);
     const htmlString = paragraphs.map(paragraph => `<p>${paragraph}</p>`).join(' ');
     return htmlString;
+}
+
+export const getFirstName = (text) => {
+    let parts = [];
+    if (text) {
+        parts = text.split(' ');
+    }
+    let extractedString = "";
+    if (parts.length > 0) {
+        extractedString = parts[parts.length - 1];
+    }
+    return extractedString;
+}
+
+export const getLastName = (text) => {
+    let extractedString = "";
+    if (text) {
+        extractedString = text.slice(0, text.lastIndexOf(" "));
+    }
+    return extractedString;
 }

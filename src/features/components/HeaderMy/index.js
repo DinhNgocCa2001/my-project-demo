@@ -11,10 +11,11 @@ import _ from "lodash"
 import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
-import { atom_cart, atom_dataProduct } from "../../../recoil/My/atomHandle";
+import { atom_cart, atom_dataProduct, token_global } from "../../../recoil/My/atomHandle";
 import Login from '../../pages/Login/index';
 import { token } from "../../common/Constant"
 // import { useNavigate } from "react-router-dom";
+import { useHistory } from 'react-router-dom';
 
 
 import "./styles.scss";
@@ -23,6 +24,8 @@ import { redirect } from 'react-router-dom';
 export default function HeaderMy(props) {
     const setData_AtomCart = useSetRecoilState(atom_cart)
     const data_AtomCart = useRecoilValue(atom_cart)
+
+    const token_global_component = useRecoilValue(token_global)
 
     const setData_atom_dataProduct = useSetRecoilState(atom_dataProduct)
     const dataEmpty =
@@ -87,6 +90,13 @@ export default function HeaderMy(props) {
             getSearchData();
         },
         [loadding, lazyParams]
+    )
+
+    useEffect(
+        () => {
+            updateOrderItem();
+        },
+        [token_global_component]
     )
 
     // const navigate = useNavigate();
@@ -167,6 +177,33 @@ export default function HeaderMy(props) {
             setDetail(dataEmpty);
         })
         //window.location.reload();
+    }
+
+    const updateOrderItem = async () => {
+        let result = await axios.get(`http://localhost:8080/order-item/get-by-id`,
+            {
+                headers: {
+                    // Sử dụng tiêu đề "Authorization"
+                    "Authorization": `Bearer ${token_global_component}`,
+                    "Content-type": "application/json"
+                }
+            }
+        );
+        console.log(result, "99999999999999999999999999")
+
+        // let _data = [...data_AtomCart]
+        // _data.push({
+        //     name: detail?.name,
+        //     quantity: detailBuy?.quantity,
+        //     discount: detail?.discount,
+        //     price: detail?.price,
+        //     sizeId: detailBuy?.sizeId,
+        //     colorId: detailBuy?.colorId
+        // })
+        setData_AtomCart(result.data.result);
+        // setItemCart(result.data.result)
+        // totalPrice(result.data.result);
+        // setVisibleAddCart(true);
     }
 
     const updateInDatabase = async (data) => {
@@ -335,7 +372,7 @@ export default function HeaderMy(props) {
     // }
 
     return (
-        <div>
+        <div className=''>
             <div className='t-header'>
                 <div className='t-header-banner'>
                     <div className='t-header-banner-content'>

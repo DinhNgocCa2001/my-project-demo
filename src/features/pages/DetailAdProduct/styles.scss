@@ -81,14 +81,12 @@
     display: flex;
     justify-content: center;
     padding: 10px 0px;
-
     // background-color: antiquewhite;
     //margin-bottom: 10px;
     &-banner {
         padding: 0px 10px;
         // width: 80%;
         width: 100%;
-
         &-content {
             display: flex;
             justify-content: space-between;
@@ -103,8 +101,7 @@
                 justify-content: end;
                 align-items: center;
                 width: 140px;
-
-                button {
+                button{
                     border: none;
                     right: 45%;
                     background-color: transparent;
@@ -142,8 +139,7 @@
                         background-color: transparent;
                         width: 40px;
                         height: 40px;
-
-                        img {
+                        img{
                             height: 100%;
                             width: 100%;
                         }
@@ -174,49 +170,38 @@
     width: 100%;
     display: flex;
     justify-content: center;
-
     // background-color: rgb(198, 220, 241);
     //margin-bottom: 10px;
     &-navbar {
-        // width: 100% !important;
         width: 80%;
         background-color: transparent;
         //padding: 0px 5px 0px 5px;
         display: flex;
         justify-content: space-between;
-        &-left {
-
-        }
-
-        &-right {
+        &-right{
             display: flex;
             align-items: center;
-
-            .pagination {
+            .pagination{
                 background-color: transparent;
             }
-
-            button {
+            button{
                 height: 37.6px;
             }
-
-            .btn-outline-customer {
+            .btn-outline-customer{
                 color: black;
                 border: 1px solid rgb(237, 240, 245);
                 background-color: white;
             }
-
-            .btn-outline-customer:hover {
+            .btn-outline-customer:hover{
                 background-color: rgb(154, 244, 203);
                 border: 1px solid rgb(154, 244, 203);
             }
         }
     }
-
-    .navbar {
+    .navbar{
         padding: 0.5rem 0rem;
     }
-
+    
 }
 
 .layout {
@@ -239,8 +224,8 @@
 
     .layout-center {
         width: 80%;
-
-        .container {
+        
+        .container{
             margin: 0.5rem 0rem;
         }
 
@@ -274,49 +259,54 @@
 //     // margin: 0px 5px;
 // }
 
-.abc {
+.abc{
     position: relative;
-
-    .def {
+    .def{
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+}
+.uuu{
+    position: relative;
+    .p-datatable-thead{
         position: sticky;
         top: 0;
         z-index: 1000;
     }
 }
 
-.uuu {
-    position: relative;
-
-    .p-datatable-thead {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-    }
-}
-
-.p-datatable-tbody {
-    tr {
-        td {
-            padding-top: 5px !important;
-            padding-bottom: 5px !important;
-
-            .p-splitbutton {
-                .p-button-icon-only{
-                    width: 1.5rem;
-                    height: 1.5rem;
-                    background-color: white;
-                    color: brown;
-                    border-left: 0px;
-                    padding-right: 4px;
-                }
-            }
+.detail{
+    padding: 10px;
+    display: flex;
+    .detail_left{
+        width: 48%;
+        display: flex;
+        .detail_left_imageSmall{
+            width: 20%;
+        }
+        .detail_left_imageLagre{
+            width: 80%;
+            background-color: #fbfbfb;
+            text-align: -webkit-center;
         }
     }
-}
-
-.p-component {
-    .p-splitbutton-defaultbutton {
-        padding: 0px !important;
-        background-color: white;
+    .detai_center{
+        width: 4%;
+    }
+    .detail_right{
+        width: 48%;
+        text-align: left;
+        .detail_right_title{
+            font-size: 25px;
+            font-weight: 300;
+        }
+        .detail_right_selection{
+            width: 50%;
+        }
+        .detail_right_money{
+            display: flex;
+            justify-content: space-between;
+        }
     }
 }

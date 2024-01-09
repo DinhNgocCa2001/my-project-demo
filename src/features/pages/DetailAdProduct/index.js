@@ -25,7 +25,7 @@ import { Editor } from "primereact/editor";
 import "./styles.scss";
 import { message } from 'antd';
 
-export default function DetailProduct(props) {
+export default function DetailAdProduct(props) {
     const toast = useRef(null);
 
     const setData_AtomCart = useSetRecoilState(atom_cart)
@@ -47,11 +47,16 @@ export default function DetailProduct(props) {
     const detailEmpty = {
         "colorId": null,
         "sizeId": null,
-        "quantity": 0
+        "soldQuantity": 0,
+        "soldQuantityAdd": 0,
+        "hasQuantity": 0
     }
     const [data, setData] = useState(null);
     const [visibleAddCart, setVisibleAddCart] = useState(true);
     const [visibleDelete, setVisibleDelete] = useState(false);
+
+    const [sizeAndColor, setSizeAndColor] = useState([]);
+
 
     const [size, setSize] = useState();
     const [color, setColor] = useState();
@@ -80,53 +85,17 @@ export default function DetailProduct(props) {
         console.log(page[0] - 1, "eeeeeeeeeeeeeeeeeeee")
     }
 
-    const addOrder = async () => {
-        let result = await axios.post(`http://localhost:8080/cart/add-order`,
-            null,
-            {
-                headers: {
-                    "Content-type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                }
-            }
-        );
-        // .then((data) => {
-
-        //     if(data.data.code == "00"){
-        //         message.warning("Vui lòng đăng nhập để tạo đơn hàng!")
+    const updateQuanlityProduct = async () => {
+        // let result = await axios.post(`http://localhost:8080/cart/add-order`,
+        //     null,
+        //     {
+        //         headers: {
+        //             "Content-type": "application/json",
+        //             "Authorization": `Bearer ${token}`,
+        //         }
         //     }
-
-        //     if(data.data.code == "01"){
-        //         message.success("Tạo đơn hàng thành công!")
-        //     }
-
-        //     if(data.data.code == "02"){
-        //         message.error("Có lỗi xảy ra!")
-        //     }
-
-        //     if(data.data.code == "03"){
-        //         message.error("Đơn hàng đã có!")
-        //     }
-
-        //     addItemToOrder(data.data.result);
-        //     console.log(data.data.result, "vvvvvvvvvvvvvvvvvvvvvvvvvvv");
-        // })
-
-        return result;
-
-
-        // let _data = [...data_AtomCart]
-        // _data.push({
-        //     name: detail?.name,
-        //     quantity: detailBuy?.quantity,
-        //     discount: detail?.discount,
-        //     price: detail?.price,
-        //     sizeId: detailBuy?.sizeId,
-        //     colorId: detailBuy?.colorId
-        // })
-        // setData_AtomCart(_data);
-        // console.log(_data, "aaaaaaaaaaaaaaaaaaaaaa")
-        // setVisibleAddCart(true);
+        // );
+        // return result;
     }
 
     const getProductVariantBySizeIdAndColorId = async () => {
@@ -146,19 +115,16 @@ export default function DetailProduct(props) {
     // };
 
     const addOrderItem = async () => {
-        let _order = await addOrder();
         let _detailBuy = { ...detailBuy };
         _detailBuy.productId = id;
-        console.log(_order, "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
-        if (!_order.data.result?.id) {
-            toast.current.show({ severity: 'warn', detail: 'Bạn phải đăng nhập để thêm sản phẩm vào giỏ hàng!' });
-            return 0;
-        }
+        // if (!_order.data.result?.id) {
+        //     toast.current.show({ severity: 'warn', detail: 'Bạn phải đăng nhập để thêm sản phẩm vào giỏ hàng!' });
+        //     return 0;
+        // }
 
-        _detailBuy.orderId = _order.data.result.id;
-        _detailBuy.userId = _order.data.result.userId;
-
-        let result = await axios.post(`http://localhost:8080/order-item/add-order-item`,
+        _detailBuy.price = detail?.price;
+        _detailBuy.soldQuantity = _detailBuy?.hasQuantity + _detailBuy?.soldQuantityAdd
+        let result = await axios.put(`http://localhost:8080/product-variant/update-quanlity-productvariant`,
             _detailBuy,
             {
                 headers: {
@@ -167,24 +133,20 @@ export default function DetailProduct(props) {
                 }
             }
         );
-        if (result.data.result == "FALSE") {
+        if (result.data.code == "00") {
             // message.error("Sản phẩm trong kho đã hết!")
-            toast.current.show({ severity: 'error', detail: 'Sản phẩm trong kho đã hết!' });
-
+            toast.current.show({ severity: 'error', detail: 'Chưa đăng nhập!' });
         }
-        if (result.data.result == "HAS") {
-            // message.warning("Sản phẩm đã ở trong giỏ hàng!")
-            toast.current.show({ severity: 'warn', detail: 'Sản phẩm đã ở trong giỏ hàng!' });
+        // if (result.data.code == "01") {
+        //     // message.warning("Sản phẩm đã ở trong giỏ hàng!")
+        //     toast.current.show({ severity: 'warn', detail: 'Sản phẩm đã ở trong giỏ hàng!' });
 
-        }
-        if (result.data.result == "NEW") {
+        // }
+        if (result.data.code == "01") {
             // message.success("Sản phẩm đã được thêm vào giỏ hàng!")
-            toast.current.show({ severity: 'success', detail: 'Sản phẩm đã được thêm vào giỏ hàng!' });
+            toast.current.show({ severity: 'success', detail: 'Cập nhật số lượng biến thể sản phẩm thành công!' });
 
         }
-        console.log(result, "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
-        updateOrderItem();
-
     }
 
     const updateOrderItem = async () => {
@@ -199,12 +161,7 @@ export default function DetailProduct(props) {
         );
         console.log(result, "99999999999999999999999999")
 
-        let _data = []
-
-        if (Array.isArray(data_AtomCart)) {
-            _data = [...data_AtomCart];
-        }
-
+        let _data = [...data_AtomCart]
         _data.push({
             name: detail?.name,
             quantity: detailBuy?.quantity,
@@ -214,7 +171,6 @@ export default function DetailProduct(props) {
             colorId: detailBuy?.colorId
         })
         setData_AtomCart(result.data.result);
-        console.log(_data, "aaaaaaaaaaaaaaaaaaaaaa")
         setVisibleAddCart(true);
     }
 
@@ -261,12 +217,19 @@ export default function DetailProduct(props) {
         })
     }
 
-    // const getAllColor = () => {
-    //     let result = axios.get(`http://localhost:8080/product/get-all-color`).then((data) => {
-    //         let dataReal = data.data;
-    //         setColor(dataReal);
-    //     })
-    // }
+    const getAllColor = () => {
+        let result = axios.get(`http://localhost:8080/product/get-all-color`).then((data) => {
+            let dataReal = data.data;
+            setColor(dataReal);
+        })
+    }
+
+    const getAllSize = () => {
+        let result = axios.get(`http://localhost:8080/product/get-all-size`).then((data) => {
+            let dataReal = data.data;
+            setSize(dataReal);
+        })
+    }
 
     const getItemColor = () => {
         let result = axios.get(`http://localhost:8080/product/get-productVariant-by-id-color/${id}`).then((data) => {
@@ -283,43 +246,37 @@ export default function DetailProduct(props) {
     }
 
 
-    // const getItemSizeAndColor = () => {
-    //     let result = axios.get(`http://localhost:8080/product/get-productVariant-by-product-id/${id}`).then((data) => {
-    //         let dataReal = data.data;
-    //         setSize(dataReal);
-    //         const sizes = data.map(item => {
-    //             return {
-    //                 sizeId: item.sizeId,
-    //                 sizeName: item.sizeName
-    //             };
-    //         });
+    const getItemSizeAndColor = () => {
+        let result = axios.get(`http://localhost:8080/product/get-productVariant-by-product-id/${id}`).then((data) => {
+            let dataReal = data.data;
+            setSizeAndColor(dataReal);
+            // setSize(dataReal);
+            // const sizes = data.map(item => {
+            //     return {
+            //         sizeId: item.sizeId,
+            //         sizeName: item.sizeName
+            //     };
+            // });
 
-    //         const colors = data.map(item => {
-    //             return {
-    //                 colorId: item.colorId,
-    //                 colorName: item.colorName
-    //             };
-    //         });
-    //         setColor(colors);
-    //         setSize(sizes)
-    //     })
-    // }
-
-    // const getAllSize = () => {
-    //     let result = axios.get(`http://localhost:8080/product/get-all-size`).then((data) => {
-    //         let dataReal = data.data;
-    //         setSize(dataReal);
-    //     })
-    // }
+            // const colors = data.map(item => {
+            //     return {
+            //         colorId: item.colorId,
+            //         colorName: item.colorName
+            //     };
+            // });
+            // setColor(colors);
+            // setSize(sizes)
+        })
+    }
 
     useEffect(
         () => {
             getProductVariant();
-            // getAllColor();
-            // getAllSize();
-            getItemColor();
-            getItemSize();
-            // getItemSizeAndColor();
+            getAllColor();
+            getAllSize();
+            // getItemColor();
+            // getItemSize();
+            getItemSizeAndColor();
         }, [])
 
     const changeSearch = (e) => {
@@ -331,6 +288,13 @@ export default function DetailProduct(props) {
     const applyServiceChange = (prop, val) => {
         let _detail = _.cloneDeep(detailBuy)
         _detail[prop] = val
+
+        if(_detail?.colorId && _detail?.sizeId){
+            let item = sizeAndColor.filter(o => o.sizeId === _detail.sizeId && o.colorId === _detail.colorId);
+            if(item.length > 0){
+                _detail.hasQuantity = item[0]?.soldQuantity;
+            }
+        }
 
         setDetailBuy(_detail)
         setVisibleAddCart(false);
@@ -357,7 +321,7 @@ export default function DetailProduct(props) {
 
 
     const handleChangeQuantity = (e) => {
-        applyServiceChange('quantity', e.value)
+        applyServiceChange('soldQuantityAdd', e.value)
     }
 
     const getItemColorContext = (lazyParams) => {
@@ -454,6 +418,12 @@ export default function DetailProduct(props) {
                     </div>
                 </div>
             </div> */}
+
+            <div className='text-left' style={{ "margin-left": '150px' }}>
+                <div className='text-3xl bg-bluegray-100 mb-4'>
+                    Cập nhật số lượng các biến thể của sản phẩm
+                </div>
+            </div>
             <div className='detail'>
                 <div className='detail_left'>
                     <div className='detail_left_imageSmall'>
@@ -488,8 +458,8 @@ export default function DetailProduct(props) {
                             value={detailBuy?.colorId}
                             onChange={handleChangeColorId}
                             options={color}
-                            optionValue='colorId'
-                            optionLabel="colorName"
+                            optionValue='id'
+                            optionLabel="name"
                             placeholder="Chọn màu sản phẩm"
                             className="text-base text-color surface-overlay surface-border border-round appearance-none outline-none focus:border-primary w-full"
                         />
@@ -499,24 +469,35 @@ export default function DetailProduct(props) {
                             value={detailBuy?.sizeId}
                             onChange={handleChangeSizeId}
                             options={size}
-                            optionLabel="sizeName"
-                            optionValue='sizeId'
+                            optionLabel="name"
+                            optionValue='id'
                             placeholder="Chọn kích thước"
                             className="text-base text-color surface-overlay surface-border border-round appearance-none outline-none focus:border-primary w-full"
                         />
-                        <div className='m-3'></div>
-                        <div>Số lượng</div>
+                        <div className='m-3'>
+
+                        </div>
+                        <div>Số lượng hiện có</div>
                         <InputNumber
                             id="Name"
-                            value={detailBuy?.quantity}
+                            value={detailBuy?.hasQuantity}
+                            disabled
+                            //disabled={readOnly}
+                            // onChange={handleChangeQuantity}
+                            className="text-base text-color surface-overlay surface-border border-round appearance-none outline-none focus:border-primary w-full"
+                        />
+
+                        <div>Số lượng thêm</div>
+                        <InputNumber
+                            id="Name"
+                            value={detailBuy?.soldQuantityAdd}
                             //disabled={readOnly}
                             onChange={handleChangeQuantity}
                             className="text-base text-color surface-overlay surface-border border-round appearance-none outline-none focus:border-primary w-full"
                         />
-                        <div className='m-3'></div>
-                        <button type="button" class="btn btn-outline-secondary"
+                        <button type="button" class="btn btn-outline-secondary mt-2"
                             disabled={visibleAddCart}
-                            onClick={(e) => addOrderItem()}>Thêm vào giỏ hàng</button>
+                            onClick={(e) => addOrderItem()}>Lưu</button>
                     </div>
                 </div>
             </div>

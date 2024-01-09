@@ -114,7 +114,7 @@ export default function Female(props) {
             // params: lazyParams
         }
         ).then((data) => {
-            setDataSuggestion(data.data);
+            setDataSuggestion(data.data.result);
             // setTotal(data.data.result?.totalElements);
         })
     }

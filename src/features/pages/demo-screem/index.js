@@ -101,9 +101,9 @@ export default function Demo(props) {
         setUserVisible(true);
     }
 
-    useEffect(() => {
-        console.log(data_AtomCart, "uuuuuuuuuuuuuuuuuuuuuuuuu")
-    }, [data_AtomCart])
+    // useEffect(() => {
+    //     console.log(data_AtomCart, "uuuuuuuuuuuuuuuuuuuuuuuuu")
+    // }, [data_AtomCart])
 
     const getDataSuggestion = () => {
         //phụ
@@ -115,7 +115,7 @@ export default function Demo(props) {
             // params: lazyParams
         }
         ).then((data) => {
-            setDataSuggestion(data.data);
+            setDataSuggestion(data.data.result);
             // setTotal(data.data.result?.totalElements);
         })
     }

@@ -11,30 +11,31 @@ import _ from "lodash"
 import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import { token } from "../../common/Constant"
-import { formattedAmount, listCategory, formattedDate } from "../../common/Constant";
+import { formattedAmount, listCategory, formattedDate, getFirstName, getLastName, listRole } from "../../common/Constant";
 import { Tag } from 'primereact/tag';
 import { Dropdown } from 'primereact/dropdown';
 import { SplitButton } from 'primereact/splitbutton';
 import { Toast } from 'primereact/toast';
+import { Checkbox } from 'primereact/checkbox';
 import "./styles.scss";
 
 export default function UserAdministration(props) {
 
     const toast = useRef(null);
 
-    const dataEmpty =
+    const userEmpty =
     {
-        "name": null,
-        "price": 0,
-        "discount": 0,
-        "image": null,
-        "description": "",
-        "status": true
+        "email": null,
+        "password": null
     }
+
     const [data, setData] = useState(null);
     const [visible, setVisible] = useState(false);
     const [visibleDelete, setVisibleDelete] = useState(false);
-    const [dataOld ,setDataOld] =  useState(null);
+    const [visibleUpdateUser, setVisibleUpdateUser] = useState(false);
+    const [dataOld, setDataOld] = useState(null);
+    const [user, setUser] = useState(userEmpty);
+
 
     /**
  * on datatable change paging
@@ -48,7 +49,6 @@ export default function UserAdministration(props) {
         setLazyParams(_lazyParams);
     };
 
-    const [detail, setDetail] = useState(dataEmpty);
     const [loadding, setLoadding] = useState(false)
     const [lazyParams, setLazyParams] = useState({
         first: 0,
@@ -66,24 +66,26 @@ export default function UserAdministration(props) {
         },
         [loadding, lazyParams]
     )
-    const hanleChangeStatus = async (product) => {        
-        let _product = {...product};
-        _product.createdAt =  null;
-        _product.updatedAt =  null;
+    const hanleChangeStatus = async (product) => {
+        let _product = { ...product };
+        _product.createdAt = null;
+        _product.updatedAt = null;
 
-        let result = await axios.put('http://localhost:8080/user/update-status',_product, {
+        let result = await axios.put('http://localhost:8080/user/update-status', _product, {
             headers: {
                 "Content-type": "application/json",
                 "Authorization": `Bearer ${token}`,
             },
         });
-        if(result.data){
+        if (result.data) {
             toast.current.show({ severity: 'info', detail: 'Thay đổi trạng thái người dùng thành công!' });
-        }else{
+        } else {
             toast.current.show({ severity: 'error', detail: 'Thay đổi trạng thái người dùng thất bại!' });
         }
         setLoadding(!loadding);
     }
+
+
 
 
     const getSearchData = async () => {
@@ -140,6 +142,11 @@ export default function UserAdministration(props) {
         return strSex;
     }
 
+    const roleBodyTemplate = (product) => {
+        let strRole = product?.roleId == 1 ? "Admin" : product?.roleId == 2 ? "User" : product?.roleId == 3 ? "Staff" : "";
+        return strRole;
+    }
+
     const dateOfBirthBodyTemplate = (product) => {
         return formattedDate(product?.dateOfBirth);
     }
@@ -168,6 +175,11 @@ export default function UserAdministration(props) {
                 label: 'Update',
                 icon: 'pi pi-refresh',
                 command: () => {
+                    let _product = { ...product }
+                    _product.lastName = getLastName(product?.fullname);
+                    _product.firstName = getFirstName(product?.fullname);
+                    setVisibleUpdateUser(true);
+                    setUser(_product);
                     // toast.current.show({ severity: 'success', summary: 'Updated', detail: 'Data Updated' });
                 }
             },
@@ -176,8 +188,8 @@ export default function UserAdministration(props) {
                 icon: 'pi pi-times',
                 command: () =>
                     hanleChangeStatus(product)
-                    // toast.current.show({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted' });
-                
+                // toast.current.show({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted' });
+
             },
         ]
         return <SplitButton
@@ -243,19 +255,19 @@ export default function UserAdministration(props) {
                 // paginator rows={5} rowsPerPageOptions={[5, 10, 25, 50]}
 
                 >
-                    <Column field="id" header="id"></Column>
-                    <Column field="username" header="User Name"></Column>
+                    <Column field="id" header="id" body={idTemplate}></Column>
+                    <Column field="username" header="Tên tài khoản"></Column>
                     <Column field="email" header="Email"></Column>
 
-                    <Column field="fullname" header="Full Name"></Column>
+                    <Column field="fullname" header="Tên đầy đủ"></Column>
 
-                    <Column field="Sex" header="Sex" body={sexBodyTemplate}></Column>
-                    <Column field="dateOfBirth" header="Date Of Birth" body={dateOfBirthBodyTemplate}></Column>
+                    <Column field="Sex" header="Giới tính" body={sexBodyTemplate}></Column>
+                    <Column field="dateOfBirth" header="Ngày sinh" body={dateOfBirthBodyTemplate}></Column>
 
 
-                    <Column field="address" header="Address"></Column>
+                    <Column field="address" header="Địa chỉ"></Column>
 
-                    <Column field="roleId" header="Role Id"></Column>
+                    <Column field="roleId" header="Quyền hạn" body={roleBodyTemplate}></Column>
 
                     {/* <Column field="createdAt" header="createdAt"></Column>
                     <Column field="updatedAt" header="updatedAt"></Column> */}
@@ -271,11 +283,57 @@ export default function UserAdministration(props) {
 
                     {/* <Column field="category" header="Category" body={categoryTemplate}></Column> */}
                     {/* <Column field="rating" header="Reviews" body={ratingBodyTemplate}></Column> */}
-                    <Column header="Status" body={statusBodyTemplate}></Column>
-                    <Column header="Action" body={actionTemplate}></Column>
+                    <Column header="Trạng thái" className='text-center' body={statusBodyTemplate}></Column>
+                    <Column header="Hành động" className='text-center' body={actionTemplate}></Column>
                 </DataTable>
             </div>
         )
+    }
+
+    const applyServiceChangeUser = (prop, val) => {
+        let _detail = _.cloneDeep(user)
+
+        _detail[prop] = val
+
+        setUser(_detail)
+        //performValidate([prop], _detail)
+        console.log(_detail, "sssssssssssssssssssss")
+    }
+    const handleChangeUsername = (e) => {
+        applyServiceChangeUser('email', e.target.value)
+    }
+    const handleChangePassword = (e) => {
+        applyServiceChangeUser('password', e.target.value)
+    }
+
+    //// create account
+
+    const handleChangeFirstName = (e) => {
+        applyServiceChangeUser('firstName', e.target.value)
+    }
+
+    const handleChangeLastName = (e) => {
+        applyServiceChangeUser('lastName', e.target.value)
+    }
+
+    const handleChangeEmail = (e) => {
+        applyServiceChangeUser('email', e.target.value)
+    }
+
+    const handleChangeDateOfBirth = (e) => {
+        applyServiceChangeUser('dateOfBirth', e.target.value)
+    }
+
+    const handleChangeAddress = (e) => {
+        applyServiceChangeUser('address', e.target.value)
+    }
+
+    const handleChangeSex = (e) => {
+        applyServiceChangeUser('sex', e.value)
+    }
+
+    const handleChangeRoleId = (e) => {
+        applyServiceChange('roleId', e.target.value)
     }
 
     const createProduct = (data) => {
@@ -290,34 +348,38 @@ export default function UserAdministration(props) {
             }
         ).then((data) => {
             setLoadding(!loadding);
-            setDetail(dataEmpty);
+            // setDetail(dataEmpty);
         })
         //window.location.reload();
     }
 
     const updateInDatabase = async (data) => {
-        let result = await axios.put(`http://localhost:8080/product/update/${data.id}`,
+        let _data = { ...data };
+        _data.createdAt = null;
+        _data.updatedAt = null;
+        let result = await axios.put(`http://localhost:8080/user/update/${_data.id}`,
+            _data,
             {
-                "id": data.id,
-                "name": data.name,
-                "price": data.price,
-                "discount": data.discount,
-                "image": data.image,
-                "description": data.description,
-                "status": data.status
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                }
             }).then((data) => {
                 setLoadding(!loadding);
-                setDetail(dataEmpty);
+                setVisibleUpdateUser(false);
+                setUser({})
+                toast.current.show({ severity: 'info', detail: 'Update thành công!' });
+                // setDetail(dataEmpty);
             })
     }
     const update = (data) => {
-        setDetail(data);
+        // setDetail(data);
         setVisible(true);
     }
     const deleteProdcut = (data) => {
         let _data = { ...data };
         _data.status = 0;
-        setDetail(_data);
+        // setDetail(_data);
         setVisibleDelete(true);
     }
 
@@ -361,62 +423,8 @@ export default function UserAdministration(props) {
         )
     }
 
-    // const performValidate = (props, _currentDetail) => {
-    //     let result = _.cloneDeep(validate), isValid = true
-    //     let _detail = _currentDetail ? _currentDetail : detail
-    //     // validate all props
-    //     if (props.length === 0) {
-    //         for (const property in result) {
-    //             props.push(property)
-    //         }
-    //     }
-
-    //     // validate props
-    //     props.forEach(prop => {
-    //         switch (prop) {
-    //             case 'bankCategoryCode':
-    //                 result[prop] = _detail.bankCategoryCode ? null : `${t('crm.bank.code')} ${t('message.cant-be-empty')}`
-    //                 if (_detail.bankCategoryCode.length>25){
-    //                     result[prop] =`${t('crm.legal.bankCategoryCode-length')}`
-    //                 }
-    //                 break
-    //             case 'bankCategoryName':
-    //                 result[prop] = _detail.bankCategoryName ? null : `${t('crm.bank.name')} ${t('message.cant-be-empty')}`
-    //                 if (_detail.bankCategoryName.length>100){
-    //                     result[prop] =`${t('crm.legal.bankCategoryName-length')}`
-    //                 }
-    //                 break
-    //             // case 'paymentTermCode':
-    //             // result[prop] =
-    //             //     _detail.paymentTermCode?.length > 0
-    //             //         ? null
-    //             //         : `${t("crm.leadSource.name")} ${t("message.cant-be-empty")}`;
-    //             //     if (!result[prop] && !REGEX_ACCOUNT_NAME.test(_detail.paymentTermCode)) {
-    //             //         result[prop] = `${t("crm.leadSource.name")} ${t("crm.require.name")}`;
-    //             //     }
-    //             //     break
-
-    //             default:
-    //                 break
-    //         }
-    //     })
-
-
-    //     setValidate(result)
-
-    //     // check if object has error
-    //     for (const property in result) {
-    //         if (result[property]) {
-    //             isValid = false
-    //             break
-    //         }
-    //     }
-
-    //     return isValid
-    // }
-
     const submit = () => {
-        let _detail = { ...detail };
+        let _detail = { ...user };
         if (_detail.id) {
             updateInDatabase(_detail);
         } else {
@@ -428,15 +436,14 @@ export default function UserAdministration(props) {
 
     const cancel = () => {
         setVisible(false);
-        setDetail(dataEmpty);
+        // setDetail(dataEmpty);
+        setVisibleUpdateUser(false)
     }
 
     const applyServiceChange = (prop, val) => {
-        let _detail = _.cloneDeep(detail)
-
+        let _detail = _.cloneDeep(user)
         _detail[prop] = val
-
-        setDetail(_detail)
+        setUser(_detail)
         //performValidate([prop], _detail)
     }
 
@@ -472,10 +479,16 @@ export default function UserAdministration(props) {
         </div>
     );
     return (
-        <div className='abc'>
+        <div className='abc mx-1'>
             <div className='def'>
                 <div className='header'>
-                    <div className='header-navbar flex justify-content-end'>
+                {/* justify-content-end */}
+                    <div className='header-navbar flex w-full'>
+                        <div className='header-navbar-left mb-1'>
+                            <div className='t-header-banner-content-center-search'>
+                                <input placeholder='Tìm kiếm người dùng' className='px-2' onChange={changeSearch}></input>
+                            </div>
+                        </div>
                         <div className='header-navbar-right'>
                             {/* <button class="btn btn-outline-customer" type="submit" onClick={(e) => setVisible(true)}>Tạo mới</button> */}
                             <nav aria-label="...">
@@ -518,7 +531,7 @@ export default function UserAdministration(props) {
                             <label for="firstname6">Name Product</label>
                             <InputText
                                 id="Name"
-                                value={detail?.name}
+                                value={user?.name}
                                 //disabled={readOnly}
                                 onChange={handleChangeName}
                                 className="text-base text-color surface-overlay border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"
@@ -528,7 +541,7 @@ export default function UserAdministration(props) {
                             <label for="lastname6">Link Url</label>
                             <InputText
                                 id="Name"
-                                value={detail?.image}
+                                value={user?.image}
                                 //disabled={readOnly}
                                 onChange={handleChangeLink}
                                 className="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"
@@ -537,7 +550,7 @@ export default function UserAdministration(props) {
                             <label for="firstname6">Price</label>
                             <InputNumber
                                 id="Name"
-                                value={detail?.price}
+                                value={user?.price}
                                 //disabled={readOnly}
                                 onChange={handleChangePrice}
                                 className="text-base text-color surface-overlay surface-border border-round appearance-none outline-none focus:border-primary w-full"
@@ -546,7 +559,7 @@ export default function UserAdministration(props) {
                             <label for="lastname6">Discount</label>
                             <InputNumber
                                 id="Name"
-                                value={detail?.discount}
+                                value={user?.discount}
                                 //disabled={readOnly}
                                 onChange={handleChangeDiscount}
                                 className="text-base text-color surface-overlay surface-border border-round appearance-none outline-none focus:border-primary w-full"
@@ -555,7 +568,7 @@ export default function UserAdministration(props) {
                             <label for="lastname6">Description</label>
                             <InputText
                                 id="Name"
-                                value={detail?.description}
+                                value={user?.description}
                                 //disabled={readOnly}
                                 onChange={handleChangeDescription}
                                 className="text-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-full"
@@ -567,12 +580,136 @@ export default function UserAdministration(props) {
             </Dialog>
 
             <Dialog header="Sửa" visible={visibleDelete} style={{ width: '50vw' }} onHide={() => setVisibleDelete(false)} footer={footerContent}>
-
                 <div class="card w-full border-none">
-                    Bạn có muốn xóa sản phẩm {detail?.name} không ?
+                    Bạn có muốn xóa sản phẩm {user?.name} không ?
                 </div>
+            </Dialog>
 
+            <Dialog closable={false} header="Sửa thông tin người dùng" visible={visibleUpdateUser} style={{ width: '50vw' }} footer={footerContent}>
+                <div className="">
+                    <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+                        <div class="row g-3">
+                            <div class="col">
+                                <input
+                                    defaultValue={user?.firstName}
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="First name"
+                                    aria-label="First name"
+                                    onChange={handleChangeFirstName}
+                                />
+                            </div>
+                            <div class="col">
+                                <input
+                                    defaultValue={user?.lastName}
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Last name"
+                                    aria-label="Last name"
+                                    onChange={handleChangeLastName}
+                                />
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col">
+                                <input
+                                    defaultValue={user?.email}
+                                    type="Email"
+                                    class="form-control"
+                                    placeholder="Email"
+                                    aria-label="First name"
+                                    onChange={handleChangeEmail}
+                                    readOnly
+                                />
+                            </div>
+                        </div>
+                        {/* <div class="row g-3">
+                            <div class="col">
+                                <input
+                                    value={user?.password}
+                                    type="password"
+                                    class="form-control"
+                                    placeholder="Password"
+                                    aria-label="First name"
+                                    onChange={handleChangePassword}
+                                />
+                            </div>
+                        </div> */}
+                        <div class="row g-3">
+                            <div class="col">
+                                <input
+                                    defaultValue={user?.dateOfBirth}
+                                    type="date"
+                                    class="form-control"
+                                    placeholder="Date Of Birth"
+                                    aria-label="First name"
+                                    onChange={handleChangeDateOfBirth}
+                                />
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col">
+                                <input
+                                    defaultValue={user?.address}
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Address"
+                                    aria-label="First name"
+                                    onChange={handleChangeAddress}
+                                />
+                            </div>
+                        </div>
+                        <div class="row g-3 pl-2 flex flex-wrap justify-content-left gap-3">
+                            <div className="flex align-items-center">
+                                <Checkbox
+                                    inputId="ingredient1"
+                                    name="pizza"
+                                    value="0"
+                                    onChange={handleChangeSex}
+                                    checked={user?.sex == 0 ? true : false}
+                                />
+                                <label htmlFor="ingredient1" className="ml-2">Male</label>
+                            </div>
+                            <div className="flex align-items-center">
+                                <Checkbox
+                                    inputId="ingredient2"
+                                    name="pizza"
+                                    value="1"
+                                    onChange={handleChangeSex}
+                                    checked={user?.sex == 1 ? true : false}
+                                />
+                                <label htmlFor="ingredient2" className="ml-2">Female</label>
+                            </div>
+                            <div className="flex align-items-center">
+                                <Checkbox
+                                    inputId="ingredient2"
+                                    name="pizza"
+                                    value="2"
+                                    onChange={handleChangeSex}
+                                    checked={user?.sex == 2 ? true : false}
+                                />
+                                <label htmlFor="ingredient2" className="ml-2">Orther</label>
+                            </div>
+                        </div>
 
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <Dropdown
+                                    value={user?.roleId}
+                                    onChange={handleChangeRoleId}
+                                    options={listRole}
+                                    optionLabel="name"
+                                    optionValue='id'
+                                    placeholder="Chọn quyền người dùng"
+                                    className="text-base text-color surface-overlay surface-border border-round appearance-none outline-none focus:border-primary w-full"
+                                />
+                            </div>
+                        </div>
+                        <p className="mt-10 text-right text-sm text-red-500">
+                            {/* {error} */}
+                        </p>
+                    </div>
+                </div>
             </Dialog>
             <Toast ref={toast} />
         </div>

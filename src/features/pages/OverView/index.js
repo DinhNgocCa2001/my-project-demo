@@ -10,7 +10,7 @@ import { Column } from 'primereact/column';
 import _ from "lodash"
 import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
-import { token } from "../../common/Constant"
+import { token, getTokenLocalStorage } from "../../common/Constant"
 import { formattedAmount, listCategory, TextToHtmlVisable } from "../../common/Constant";
 import { Tag } from 'primereact/tag';
 import { Dropdown } from 'primereact/dropdown';
@@ -34,6 +34,11 @@ import "./styles.scss";
 
 export default function OverView(props) {
     const toast = useRef(null);
+
+    const getTokenLocalStorageV1 = () => {
+        const token = localStorage.getItem("token")
+        return token
+    }
 
     const dataEmpty =
     {
@@ -117,7 +122,7 @@ export default function OverView(props) {
         let result = await axios.get('http://localhost:8080/product/ad/search', {
             headers: {
                 "Content-type": "application/json",
-                "Authorization": `Bearer ${token_global_component}`,
+                "Authorization": `Bearer ${token}`,
             },
             params: lazyParams
         });
@@ -398,7 +403,9 @@ export default function OverView(props) {
                             {rowdata?.name}
                         </div>
                         <div className='productCard__body__content__priceFinal'>
-                            {new Intl.NumberFormat().format(rowdata.price * (100 - rowdata.discount) / 100)}₫
+                            {/* {new Intl.NumberFormat().format(rowdata.price * (100 - rowdata.discount) / 100)}₫ */}
+                            {formattedAmount(rowdata.price * (100 - rowdata.discount) / 100)}
+
                         </div>
                         <div className='productCard__body__content__cost'>
                             <div className='productCard__body__content__cost__origin'>

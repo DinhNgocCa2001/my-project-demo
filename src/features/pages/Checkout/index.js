@@ -305,7 +305,7 @@ export default function Checkout(props) {
             }
         );
         if (result.data?.result == "Done") {
-            toast.current.show({ severity: 'Success', detail: 'Đơn hàng đang được xử lý!' });
+            toast.current.show({ severity: 'Success', detail: 'Đặt hàng thành công!' });
         } else {
             toast.current.show({ severity: 'Error', detail: 'Tạo đơn hàng thất bại!' });
         }

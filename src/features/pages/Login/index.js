@@ -47,7 +47,6 @@ export default function Login(props) {
 
 
     const [login, setLogin] = useState(userEmpty);
-    // const [userVisible, setUserVisible] = useState(false);
     const [user, setUser] = useState(userEmpty);
     const [error, setError] = useState('');
 

@@ -402,7 +402,9 @@ export default function UserAdministration(props) {
                             {rowdata.name}
                         </div>
                         <div className='productCard__body__content__priceFinal'>
-                            {new Intl.NumberFormat().format(rowdata.price * (100 - rowdata.discount) / 100)}₫
+                            {/* {new Intl.NumberFormat().format(rowdata.price * (100 - rowdata.discount) / 100)}₫ */}
+                            {formattedAmount(rowdata.price * (100 - rowdata.discount) / 100)}
+
                         </div>
                         <div className='productCard__body__content__cost'>
                             <div className='productCard__body__content__cost__origin'>

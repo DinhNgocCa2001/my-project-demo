@@ -12,10 +12,13 @@ import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { useRecoilState, useSetRecoilState, useRecoilValue } from "recoil";
 import { atom_cart, atom_dataProduct } from "../../../recoil/My/atomHandle";
-import { token } from "../../common/Constant";
 import "./styles.scss";
+import ProductSuggestion from "../../components/ProductSuggestion/index"
+import { token, listCategory, formattedAmount } from "../../common/Constant"
+
 
 export default function Demo(props) {
+
     const setData_AtomCart = useSetRecoilState(atom_cart)
     const data_AtomCart = useRecoilValue(atom_cart)
 
@@ -228,7 +231,8 @@ export default function Demo(props) {
                             {rowdata.name}
                         </div>
                         <div className='productCard__body__content__priceFinal'>
-                            {new Intl.NumberFormat().format(rowdata.price * (100 - rowdata.discount) / 100)}₫
+                            {/* {new Intl.NumberFormat().format(rowdata.price * (100 - rowdata.discount) / 100)}₫ */}
+                            {formattedAmount(rowdata.price * (100 - rowdata.discount) / 100)}
                         </div>
                         <div className='productCard__body__content__cost'>
                             <div className='productCard__body__content__cost__origin'>
@@ -472,7 +476,7 @@ export default function Demo(props) {
                 <div className='header-navbar'>
                     <nav class="navbar navbar-expand-lg navbar-light">
 
-                        <a class="navbar-brand" href="#">Sale</a>
+                    {/* <a class="navbar-brand" href="/product" className='btn btn-outline-secondary'>Quay lại trang chủ</a> */}
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
                         </button>
@@ -500,7 +504,7 @@ export default function Demo(props) {
                         </div>
                     </nav>
                     <div className='header-navbar-right'>
-                        <button class="btn btn-outline-customer" type="submit" onClick={(e) => setVisible(true)}>Tạo mới</button>
+                        {/* <button class="btn btn-outline-customer" type="submit" onClick={(e) => setVisible(true)}>Tạo mới</button> */}
                         <nav aria-label="...">
                             <ul class="pagination mb-0 ml-1">
                                 <li class="page-item disabled">
@@ -554,6 +558,9 @@ export default function Demo(props) {
                     </div>
                 </div>
             </div>
+
+            <ProductSuggestion data={dataSuggestion} detailProduct={detailProduct}></ProductSuggestion>
+
 
             <Dialog header="Sửa" visible={visible} style={{ width: '50vw' }} onHide={() => setVisible(false)} footer={footerContent}>
 

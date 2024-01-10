@@ -355,9 +355,13 @@ export default function HeaderMy(props) {
             case 5:
                 href = "/product/beauty"
                 break;
+            case 0:
+                href = "/product"
+                break;
             default:
             // Các hành động mặc định khi không có trường hợp nào khớp
         }
+        console.log(href, "55555555555555555555555555555")
         return (
             <li class="nav-item" className="text-gray-600 mx-6">
                 <a class="nav-link" href={href}>{category?.name}</a>
@@ -385,6 +389,10 @@ export default function HeaderMy(props) {
                             <div className='t-header-banner-content-center-search'>
                                 <input placeholder='Tìm kiếm sản phẩm' className='px-2' onChange={changeSearch}></input>
                             </div>
+                            {/* <Button type="button" class="position-relative d-flex" >
+                                <a class="nav-link" href={"/product"}>Tìm kiếm</a>
+                            </Button> */}
+
                             {/* <div className='t-header-banner-content-center-help'>
                                 <div className='t-header-banner-content-center-help-img'>
                                     <img src="https://cdn-icons-png.flaticon.com/512/7044/7044607.png" alt='hello img' />
@@ -421,7 +429,8 @@ export default function HeaderMy(props) {
                                 </span>
                             </button>
                             <div className='mr-5'></div>
-                            <button type="button" class="position-relative d-flex" onClick={handleLogin}>
+
+                            <Button type="button" class="position-relative d-flex" onClick={handleLogin}>
                                 {
                                     (!login?.username || login?.username?.length == 0) &&
                                     <i className="bx bx-user-circle text-3xl"></i>
@@ -429,13 +438,16 @@ export default function HeaderMy(props) {
                                 <div class="btn btn-outline-secondary">
                                     {login?.username ? login.username : "Login"}
                                 </div>
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <ul class="nav justify-content-center ">
+            <li class="nav-item" className="text-gray-600 mx-6">
+                <a class="nav-link" href={"/product"}>{"Trang chủ"}</a>
+            </li>
                 {category?.map(ca => renderCategory(ca))}
                 {/* <li class="nav-item mx-5">
                     <a class="nav-link active" aria-current="page" href="#">Active</a>

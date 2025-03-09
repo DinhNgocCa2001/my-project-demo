@@ -26,6 +26,8 @@ import Accessory from './features/pages/Category/Accessory';
 
 import Beauty from './features/pages/Category/Beauty';
 
+import TestShopee from './features/pages/TestShopee/index';
+
 
 
 
@@ -59,6 +61,9 @@ function App() {
 
 
             <Route index path="/admin-user" element={<UserAdministration />} />
+
+            {/* test shopee */}
+            <Route index path="/test-shopee" element={<TestShopee />} />
           </Routes>
         </BrowserRouter>
       </div>
